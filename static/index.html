@@ -8,32 +8,16 @@
 </head>
 <body>
     <div class="control-panel">
-        <h1>Editorial Flipbook</h1>
-        <p class="subtitle">Generate an interactive A4 magazine layout</p>
-        
-        <div class="controls">
-            <div class="input-group">
-                <label for="prompt">Topic Prompt:</label>
-                <input type="text" id="prompt" value="modern sustainable architecture integrated with nature">
-            </div>
-            
-            <div class="generation-controls">
-                <div class="input-group">
-                    <label for="numPages">Pages:</label>
-                    <input type="number" id="numPages" value="5" min="1" max="10">
-                </div>
-                <button id="generateBtn" class="btn-generate">Generate Flipbook</button>
-            </div>
-        </div>
+        <button id="generateBtn" class="btn-generate">Generate Flipbook</button>
     </div>
 
     <div id="flipbookView" class="flipbook-view hidden">
         <div class="nav-controls">
-            <button id="prevPage" class="nav-btn">← Previous Page</button>
+            <button id="prevPage" class="nav-btn">← Previous</button>
             <div class="page-info">
-                <span>Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
+                <span>Page <span id="currentPage">1</span> of 5</span>
             </div>
-            <button id="nextPage" class="nav-btn">Next Page →</button>
+            <button id="nextPage" class="nav-btn">Next →</button>
         </div>
 
         <div class="flipbook-stage">

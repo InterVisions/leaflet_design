@@ -2,26 +2,26 @@
 const state = {
     pages: [],
     currentPageIndex: 0,
-    totalPages: 0
+    totalPages: 5 // Hardcoded to exactly 5
 };
 
 const elements = {
-    promptInput: document.getElementById('prompt'),
-    numPagesInput: document.getElementById('numPages'),
     generateBtn: document.getElementById('generateBtn'),
     flipbookView: document.getElementById('flipbookView'),
     prevPage: document.getElementById('prevPage'),
     nextPage: document.getElementById('nextPage'),
-    currentPage: document.getElementById('currentPage'),
-    totalPages: document.getElementById('totalPages')
+    currentPage: document.getElementById('currentPage')
 };
 
-// Image placeholder generator (Portrait ratio for A4)
-function generatePlaceholder(slotId, prompt, pageNum) {
+// Fixed content prompt since the input is gone
+const FIXED_PROMPT = "Modern architecture integrated with nature";
+
+// Image placeholder generator
+function generatePlaceholder(slotId, pageNum) {
     const canvas = document.createElement('canvas');
-    canvas.width = 600; canvas.height = 800; // Taller images for A4 fitting
+    canvas.width = 600; canvas.height = 800; 
     const ctx = canvas.getContext('2d');
-    const hue = 140; // Green base
+    const hue = 140; 
     const variation = (parseInt(slotId.split('-')[1]) * 20) + (pageNum * 15);
     
     const gradient = ctx.createLinearGradient(0, 0, 600, 800);
@@ -30,7 +30,6 @@ function generatePlaceholder(slotId, prompt, pageNum) {
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 600, 800);
     
-    // Slight texture pattern
     ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
     for (let i = 0; i < 20; i++) {
         ctx.beginPath();
@@ -45,7 +44,7 @@ function generatePlaceholder(slotId, prompt, pageNum) {
     return canvas.toDataURL('image/jpeg');
 }
 
-// Layout cycle config
+// 5 Layouts for the 5 pages
 const PAGE_LAYOUTS = [
     { name: 'cover' },
     { name: 'feature' },
@@ -54,8 +53,8 @@ const PAGE_LAYOUTS = [
     { name: 'closing' }
 ];
 
-function createLeafletHTML(images, pageIndex, prompt) {
-    const layout = PAGE_LAYOUTS[pageIndex % PAGE_LAYOUTS.length].name;
+function createLeafletHTML(images, pageIndex) {
+    const layout = PAGE_LAYOUTS[pageIndex].name;
     
     if (layout === 'cover') {
         return `
@@ -64,7 +63,7 @@ function createLeafletHTML(images, pageIndex, prompt) {
                 <div class="cover-overlay">
                     <span class="cover-tag">Project Overview</span>
                     <h1 class="cover-title">Design<br>Vision</h1>
-                    <p class="cover-sub">Exploring concepts for: ${prompt.substring(0, 30)}...</p>
+                    <p class="cover-sub">Exploring concepts for: ${FIXED_PROMPT}</p>
                 </div>
             </div>`;
     }
@@ -147,51 +146,49 @@ function createLeafletHTML(images, pageIndex, prompt) {
 }
 
 async function generateFlipbook() {
-    const prompt = elements.promptInput.value.trim();
-    const numPages = parseInt(elements.numPagesInput.value) || 5;
-    
     elements.generateBtn.disabled = true;
     elements.generateBtn.textContent = 'Generating...';
     
-    // Fake loading delay to mimic API
+    // Fake loading delay
     await new Promise(resolve => setTimeout(resolve, 800));
     
     const pages = [];
-    for (let i = 0; i < numPages; i++) {
+    for (let i = 0; i < state.totalPages; i++) {
         const page = { id: i, images: {} };
         ['img-1', 'img-2', 'img-3'].forEach(slotId => {
-            page.images[slotId] = generatePlaceholder(slotId, prompt, i);
+            page.images[slotId] = generatePlaceholder(slotId, i);
         });
         pages.push(page);
     }
     
     state.pages = pages;
-    state.totalPages = pages.length;
     state.currentPageIndex = 0;
     
-    buildFlipbook('flipbook', pages, prompt);
+    buildFlipbook('flipbook', pages);
     
     elements.flipbookView.classList.remove('hidden');
     updatePageNavigation();
     
     elements.generateBtn.disabled = false;
     elements.generateBtn.textContent = 'Generate Flipbook';
+    
+    // Smoothly reveal the book
     elements.flipbookView.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function buildFlipbook(containerId, pages, prompt) {
+function buildFlipbook(containerId, pages) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
     
     pages.forEach((page, index) => {
         const pageEl = document.createElement('div');
         pageEl.className = 'page';
-        pageEl.style.zIndex = pages.length - index; // Ensure correct stacking
+        pageEl.style.zIndex = pages.length - index; 
         
         const content = document.createElement('div');
         content.className = 'page-content';
         
-        content.innerHTML = createLeafletHTML(page.images, index, prompt);
+        content.innerHTML = createLeafletHTML(page.images, index);
         
         pageEl.appendChild(content);
         container.appendChild(pageEl);
@@ -212,7 +209,6 @@ function flipBook() {
 
 function updatePageNavigation() {
     elements.currentPage.textContent = state.currentPageIndex + 1;
-    elements.totalPages.textContent = state.totalPages;
     elements.prevPage.disabled = state.currentPageIndex === 0;
     elements.nextPage.disabled = state.currentPageIndex === state.totalPages - 1;
 }
