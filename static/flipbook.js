@@ -1,419 +1,229 @@
-// ============================================
-// 3D FLIPBOOK COMPARISON
-// Two books side-by-side, each with flippable pages
-// ============================================
-
 // State
 const state = {
-    votes: { A: 0, B: 0 },
-    pages: [],  // Array of page data
+    pages: [],
     currentPageIndex: 0,
     totalPages: 0
 };
 
-// Elements
 const elements = {
     promptInput: document.getElementById('prompt'),
-    modelAInput: document.getElementById('modelA'),
-    modelBInput: document.getElementById('modelB'),
     numPagesInput: document.getElementById('numPages'),
     generateBtn: document.getElementById('generateBtn'),
     flipbookView: document.getElementById('flipbookView'),
-    flipbookA: document.getElementById('flipbookA'),
-    flipbookB: document.getElementById('flipbookB'),
-    labelA: document.getElementById('labelA'),
-    labelB: document.getElementById('labelB'),
     prevPage: document.getElementById('prevPage'),
     nextPage: document.getElementById('nextPage'),
     currentPage: document.getElementById('currentPage'),
-    totalPages: document.getElementById('totalPages'),
-    countA: document.getElementById('countA'),
-    countB: document.getElementById('countB'),
-    resetBtn: document.getElementById('resetBtn')
+    totalPages: document.getElementById('totalPages')
 };
 
-// Image slots for each leaflet
-const IMAGE_SLOTS = [
-    { id: 'img-1', label: 'Hero Image' },
-    { id: 'img-2', label: 'Detail 1' },
-    { id: 'img-3', label: 'Detail 2' },
-    { id: 'img-4', label: 'Feature Image' },
-    { id: 'img-5', label: 'Info Image' }
-];
-
-// ============================================
-// PLACEHOLDER GENERATION
-// ============================================
-
-function generatePlaceholder(model, slotId, prompt, pageNum) {
+// Image placeholder generator (Portrait ratio for A4)
+function generatePlaceholder(slotId, prompt, pageNum) {
     const canvas = document.createElement('canvas');
-    const width = 800;
-    const height = 600;
-    canvas.width = width;
-    canvas.height = height;
+    canvas.width = 600; canvas.height = 800; // Taller images for A4 fitting
     const ctx = canvas.getContext('2d');
+    const hue = 140; // Green base
+    const variation = (parseInt(slotId.split('-')[1]) * 20) + (pageNum * 15);
     
-    // Color variation based on model and page
-    const hue = model === 'A' ? 140 : 200;
-    const variation = (parseInt(slotId.split('-')[1]) * 15) + (pageNum * 8);
-    
-    // Gradient
-    const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, `hsl(${hue + variation}, 45%, 65%)`);
-    gradient.addColorStop(1, `hsl(${hue + variation}, 45%, 45%)`);
+    const gradient = ctx.createLinearGradient(0, 0, 600, 800);
+    gradient.addColorStop(0, `hsl(${hue + variation}, 40%, 65%)`);
+    gradient.addColorStop(1, `hsl(${hue + variation}, 40%, 35%)`);
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
+    ctx.fillRect(0, 0, 600, 800);
     
-    // Pattern
+    // Slight texture pattern
     ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-    for (let i = 0; i < 40; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const size = Math.random() * 80 + 40;
+    for (let i = 0; i < 20; i++) {
         ctx.beginPath();
-        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.arc(Math.random() * 600, Math.random() * 800, Math.random() * 60 + 20, 0, Math.PI * 2);
         ctx.fill();
     }
     
-    // Text
     ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.font = 'bold 28px Arial';
+    ctx.font = 'bold 36px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(`Model ${model}`, width/2, height/2 - 60);
-    
-    ctx.font = '22px Arial';
-    ctx.fillText(`Page ${pageNum + 1}`, width/2, height/2 - 20);
-    
-    ctx.font = '18px Arial';
-    ctx.fillText(`Slot: ${slotId}`, width/2, height/2 + 20);
-    
-    ctx.font = 'italic 14px Arial';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    const shortPrompt = prompt.substring(0, 30);
-    ctx.fillText(`"${shortPrompt}..."`, width/2, height/2 + 50);
-    
-    return canvas.toDataURL('image/png');
+    ctx.fillText(`Image ${slotId.split('-')[1]}`, 300, 400);
+    return canvas.toDataURL('image/jpeg');
 }
 
-// ============================================
-// GENERATE FLIPBOOKS
-// ============================================
+// Layout cycle config
+const PAGE_LAYOUTS = [
+    { name: 'cover' },
+    { name: 'feature' },
+    { name: 'story' },
+    { name: 'gallery' },
+    { name: 'closing' }
+];
 
-async function generateFlipbooks() {
-    const prompt = elements.promptInput.value.trim();
-    const modelAName = elements.modelAInput.value.trim();
-    const modelBName = elements.modelBInput.value.trim();
-    const numPages = parseInt(elements.numPagesInput.value) || 5;
+function createLeafletHTML(images, pageIndex, prompt) {
+    const layout = PAGE_LAYOUTS[pageIndex % PAGE_LAYOUTS.length].name;
     
-    if (!prompt) {
-        alert('Please enter a prompt');
-        return;
+    if (layout === 'cover') {
+        return `
+            <div class="leaflet layout-cover">
+                <div class="cover-image"><img src="${images['img-1']}"></div>
+                <div class="cover-overlay">
+                    <span class="cover-tag">Project Overview</span>
+                    <h1 class="cover-title">Design<br>Vision</h1>
+                    <p class="cover-sub">Exploring concepts for: ${prompt.substring(0, 30)}...</p>
+                </div>
+            </div>`;
     }
     
-    // Update labels
-    elements.labelA.textContent = modelAName;
-    elements.labelB.textContent = modelBName;
+    if (layout === 'feature') {
+        return `
+            <div class="leaflet layout-feature">
+                <div class="feature-main">
+                    <div class="feature-img-wrap"><img src="${images['img-1']}"></div>
+                    <div class="feature-caption">
+                        <h2>Core Concept</h2>
+                        <p>Focusing on sustainability and modern aesthetics.</p>
+                    </div>
+                </div>
+                <div class="feature-side">
+                    <div class="feature-side-img"><img src="${images['img-2']}"></div>
+                    <div class="feature-side-text">
+                        <span class="feature-badge">Detail View</span>
+                        <h3>Material Study</h3>
+                        <p>Natural textures integration.</p>
+                    </div>
+                </div>
+            </div>`;
+    }
     
-    // Loading state
-    document.body.classList.add('generating');
+    if (layout === 'story') {
+        return `
+            <div class="leaflet layout-story">
+                <div class="story-photo">
+                    <img src="${images['img-1']}">
+                    <span class="story-photo-label">Environmental Context</span>
+                </div>
+                <div class="story-body">
+                    <h2 class="story-heading">Harmonious Integration</h2>
+                    <div class="story-columns">
+                        <p>The design seamlessly blends the built environment with surrounding natural elements, creating a cohesive visual language.</p>
+                        <p>Light and shadow play a crucial role in defining the spatial experience throughout the day.</p>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    if (layout === 'gallery') {
+        return `
+            <div class="leaflet layout-gallery">
+                <div class="gallery-header">
+                    <h2>Visual Explorations</h2>
+                    <p>Alternative perspectives and interior studies.</p>
+                </div>
+                <div class="gallery-grid">
+                    <div class="gallery-item gallery-item-large">
+                        <img src="${images['img-1']}">
+                        <span class="gallery-label">Primary Angle</span>
+                    </div>
+                    <div class="gallery-item"><img src="${images['img-2']}"></div>
+                    <div class="gallery-item"><img src="${images['img-3']}"></div>
+                </div>
+            </div>`;
+    }
+
+    if (layout === 'closing') {
+        return `
+            <div class="leaflet layout-closing">
+                <div class="closing-stats">
+                    <div class="closing-stats-img"><img src="${images['img-1']}"></div>
+                    <div class="closing-numbers">
+                        <div class="stat-block"><span class="stat-n">100%</span><span class="stat-l">Renewable</span></div>
+                        <div class="stat-block"><span class="stat-n">45%</span><span class="stat-l">Green Space</span></div>
+                    </div>
+                </div>
+                <div class="closing-cta">
+                    <div class="closing-cta-img"><img src="${images['img-2']}"></div>
+                    <div class="closing-cta-text">
+                        <h2>Next Steps</h2>
+                        <p>Ready to move this concept into development.</p>
+                    </div>
+                </div>
+            </div>`;
+    }
+}
+
+async function generateFlipbook() {
+    const prompt = elements.promptInput.value.trim();
+    const numPages = parseInt(elements.numPagesInput.value) || 5;
+    
     elements.generateBtn.disabled = true;
     elements.generateBtn.textContent = 'Generating...';
     
-    // Simulate loading
+    // Fake loading delay to mimic API
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    // Generate pages
     const pages = [];
     for (let i = 0; i < numPages; i++) {
-        const page = {
-            id: i,
-            prompt: prompt,
-            modelA: modelAName,
-            modelB: modelBName,
-            imagesA: {},
-            imagesB: {}
-        };
-        
-        // Generate images for this page
-        IMAGE_SLOTS.forEach(slot => {
-            page.imagesA[slot.id] = generatePlaceholder('A', slot.id, prompt, i);
-            page.imagesB[slot.id] = generatePlaceholder('B', slot.id, prompt, i);
+        const page = { id: i, images: {} };
+        ['img-1', 'img-2', 'img-3'].forEach(slotId => {
+            page.images[slotId] = generatePlaceholder(slotId, prompt, i);
         });
-        
         pages.push(page);
     }
     
-    // Update state
     state.pages = pages;
     state.totalPages = pages.length;
     state.currentPageIndex = 0;
     
-    // Build both flipbooks
-    buildFlipbook('flipbookA', 'A', pages);
-    buildFlipbook('flipbookB', 'B', pages);
+    buildFlipbook('flipbook', pages, prompt);
     
-    // Show flipbook view
     elements.flipbookView.classList.remove('hidden');
-    
-    // Update UI
     updatePageNavigation();
     
-    // Setup vote buttons
-    setupVoteButtons();
-    
-    // Remove loading
-    document.body.classList.remove('generating');
     elements.generateBtn.disabled = false;
-    elements.generateBtn.textContent = 'Generate New Flipbooks';
-    
-    // Scroll to view
+    elements.generateBtn.textContent = 'Generate Flipbook';
     elements.flipbookView.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ============================================
-// BUILD FLIPBOOK
-// ============================================
-
-function buildFlipbook(containerId, model, pages) {
+function buildFlipbook(containerId, pages, prompt) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
     
     pages.forEach((page, index) => {
         const pageEl = document.createElement('div');
         pageEl.className = 'page';
-        pageEl.dataset.pageIndex = index;
+        pageEl.style.zIndex = pages.length - index; // Ensure correct stacking
         
-        if (index === 0) {
-            pageEl.classList.add('active');
-        }
+        const content = document.createElement('div');
+        content.className = 'page-content';
         
-        const pageContent = document.createElement('div');
-        pageContent.className = 'page-content';
+        content.innerHTML = createLeafletHTML(page.images, index, prompt);
         
-        // Create leaflet for this page
-        const images = model === 'A' ? page.imagesA : page.imagesB;
-        pageContent.innerHTML = createLeafletHTML(images);
-        
-        pageEl.appendChild(pageContent);
+        pageEl.appendChild(content);
         container.appendChild(pageEl);
     });
 }
 
-// ============================================
-// CREATE LEAFLET HTML
-// ============================================
-
-function createLeafletHTML(images) {
-    return `
-        <div class="leaflet">
-            <!-- Panel 1: Title -->
-            <div class="panel panel-title">
-                <h1 class="title">Green Spaces<br>Initiative</h1>
-                <p class="intro-text">
-                    Discover the beauty of nature in your urban environment. 
-                    Our parks and gardens provide sanctuary for both wildlife and community.
-                </p>
-            </div>
-            
-            <!-- Panel 2: Hero -->
-            <div class="panel panel-hero">
-                <div class="image-container hero-img">
-                    <img src="${images['img-1']}" alt="Hero image">
-                </div>
-                <div class="overlay-text">
-                    <h3>Connecting with Nature</h3>
-                    <p>Experience tranquility in the heart of the city</p>
-                </div>
-            </div>
-            
-            <!-- Panel 3: Dual -->
-            <div class="panel panel-dual">
-                <div class="dual-grid">
-                    <div class="image-container">
-                        <img src="${images['img-2']}" alt="Detail 1">
-                    </div>
-                    <div class="image-container">
-                        <img src="${images['img-3']}" alt="Detail 2">
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Panel 4: Stats -->
-            <div class="panel panel-stats">
-                <div class="stats-grid">
-                    <div class="stat">
-                        <div class="stat-number">15+</div>
-                        <div class="stat-label">Parks & Gardens</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">45%</div>
-                        <div class="stat-label">Green Coverage</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">78%</div>
-                        <div class="stat-label">Satisfaction</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Panel 5: Feature -->
-            <div class="panel panel-feature">
-                <div class="image-container full-height">
-                    <img src="${images['img-4']}" alt="Feature image">
-                    <div class="image-caption">
-                        Preserving biodiversity for future generations
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Panel 6: Info -->
-            <div class="panel panel-info">
-                <h3>Visit Our Spaces</h3>
-                <p class="body-text">
-                    Open daily from dawn to dusk. Free admission to all public gardens 
-                    and park facilities.
-                </p>
-                <div class="image-container info-img">
-                    <img src="${images['img-5']}" alt="Info image">
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-// ============================================
-// PAGE NAVIGATION
-// ============================================
-
-function flipToPage(pageIndex) {
-    if (pageIndex < 0 || pageIndex >= state.totalPages) return;
-    
-    const prevIndex = state.currentPageIndex;
-    state.currentPageIndex = pageIndex;
-    
-    // Flip both books simultaneously
-    flipBook('flipbookA', prevIndex, pageIndex);
-    flipBook('flipbookB', prevIndex, pageIndex);
-    
+function flipBook() {
+    const pages = document.getElementById('flipbook').querySelectorAll('.page');
+    pages.forEach((page, index) => {
+        if (index < state.currentPageIndex) {
+            page.classList.add('flipped');
+        } else {
+            page.classList.remove('flipped');
+        }
+    });
     updatePageNavigation();
-}
-
-function flipBook(bookId, fromIndex, toIndex) {
-    const book = document.getElementById(bookId);
-    const pages = book.querySelectorAll('.page');
-    
-    if (fromIndex < toIndex) {
-        // Flipping forward
-        for (let i = fromIndex; i < toIndex; i++) {
-            pages[i].classList.add('flipped');
-            pages[i].classList.remove('active');
-        }
-        pages[toIndex].classList.add('active');
-    } else {
-        // Flipping backward
-        for (let i = fromIndex; i > toIndex; i--) {
-            pages[i].classList.remove('flipped');
-            pages[i].classList.remove('active');
-        }
-        pages[toIndex].classList.add('active');
-        pages[toIndex].classList.remove('flipped');
-    }
-}
-
-function nextPage() {
-    if (state.currentPageIndex < state.totalPages - 1) {
-        flipToPage(state.currentPageIndex + 1);
-    }
-}
-
-function prevPage() {
-    if (state.currentPageIndex > 0) {
-        flipToPage(state.currentPageIndex - 1);
-    }
 }
 
 function updatePageNavigation() {
     elements.currentPage.textContent = state.currentPageIndex + 1;
     elements.totalPages.textContent = state.totalPages;
-    
     elements.prevPage.disabled = state.currentPageIndex === 0;
     elements.nextPage.disabled = state.currentPageIndex === state.totalPages - 1;
 }
 
-// ============================================
-// VOTING
-// ============================================
-
-function setupVoteButtons() {
-    document.querySelectorAll('.btn-vote').forEach(button => {
-        button.addEventListener('click', () => {
-            const model = button.dataset.model;
-            handleVote(model);
-        });
-    });
-}
-
-function handleVote(model) {
-    state.votes[model]++;
-    updateVoteDisplay();
-    
-    const button = document.querySelector(`.btn-vote[data-model="${model}"]`);
-    button.classList.add('selected');
-    setTimeout(() => button.classList.remove('selected'), 800);
-    
-    console.log(`Vote for Model ${model} on page ${state.currentPageIndex + 1}. Total: A=${state.votes.A}, B=${state.votes.B}`);
-}
-
-function updateVoteDisplay() {
-    elements.countA.textContent = state.votes.A;
-    elements.countB.textContent = state.votes.B;
-}
-
-function resetWorkshop() {
-    if (confirm('Reset everything?')) {
-        state.votes.A = 0;
-        state.votes.B = 0;
-        state.pages = [];
-        state.currentPageIndex = 0;
-        state.totalPages = 0;
-        
-        updateVoteDisplay();
-        updatePageNavigation();
-        
-        elements.flipbookA.innerHTML = '';
-        elements.flipbookB.innerHTML = '';
-        elements.flipbookView.classList.add('hidden');
-        
-        elements.generateBtn.textContent = 'Generate Flipbooks';
-        
-        console.log('Workshop reset');
-    }
-}
-
-// ============================================
-// EVENT LISTENERS
-// ============================================
-
-elements.generateBtn.addEventListener('click', generateFlipbooks);
-elements.promptInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') generateFlipbooks();
+// Navigation Listeners
+elements.prevPage.addEventListener('click', () => {
+    if (state.currentPageIndex > 0) { state.currentPageIndex--; flipBook(); }
 });
 
-elements.prevPage.addEventListener('click', prevPage);
-elements.nextPage.addEventListener('click', nextPage);
-elements.resetBtn.addEventListener('click', resetWorkshop);
-
-// Keyboard navigation
-document.addEventListener('keydown', (e) => {
-    if (elements.flipbookView.classList.contains('hidden')) return;
-    
-    if (e.key === 'ArrowLeft') prevPage();
-    if (e.key === 'ArrowRight') nextPage();
+elements.nextPage.addEventListener('click', () => {
+    if (state.currentPageIndex < state.totalPages - 1) { state.currentPageIndex++; flipBook(); }
 });
 
-// ============================================
-// INITIALIZATION
-// ============================================
-
-console.log('3D Flipbook Comparison - Ready');
-console.log('Generate flipbooks to start. Use arrow keys to flip pages!');
+elements.generateBtn.addEventListener('click', generateFlipbook);

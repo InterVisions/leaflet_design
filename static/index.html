@@ -3,122 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CLIP Model Flipbook Comparison</title>
+    <title>A4 Editorial Flipbook</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Control Panel -->
     <div class="control-panel">
-        <h1>CLIP Model Flipbook Comparison</h1>
-        <p class="subtitle">Compare models by flipping through leaflet pages</p>
+        <h1>Editorial Flipbook</h1>
+        <p class="subtitle">Generate an interactive A4 magazine layout</p>
         
         <div class="controls">
             <div class="input-group">
-                <label for="prompt">Prompt:</label>
-                <input 
-                    type="text" 
-                    id="prompt" 
-                    placeholder="e.g., 'serene botanical garden'"
-                    value="peaceful botanical garden with tropical plants"
-                >
-            </div>
-            
-            <div class="model-row">
-                <div class="model-input">
-                    <label for="modelA">Model A:</label>
-                    <input type="text" id="modelA" value="CLIP-ViT-L-14">
-                </div>
-                <div class="model-input">
-                    <label for="modelB">Model B:</label>
-                    <input type="text" id="modelB" value="CLIP-ViT-B-32">
-                </div>
+                <label for="prompt">Topic Prompt:</label>
+                <input type="text" id="prompt" value="modern sustainable architecture integrated with nature">
             </div>
             
             <div class="generation-controls">
                 <div class="input-group">
-                    <label for="numPages">Number of pages to generate:</label>
+                    <label for="numPages">Pages:</label>
                     <input type="number" id="numPages" value="5" min="1" max="10">
                 </div>
-                <button id="generateBtn" class="btn-generate">Generate Flipbooks</button>
+                <button id="generateBtn" class="btn-generate">Generate Flipbook</button>
             </div>
         </div>
     </div>
 
-    <!-- Flipbook Comparison -->
     <div id="flipbookView" class="flipbook-view hidden">
-        
-        <!-- Navigation Controls -->
         <div class="nav-controls">
-            <button id="prevPage" class="nav-btn">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="15 18 9 12 15 6"></polyline>
-                </svg>
-                Previous Page
-            </button>
-            
+            <button id="prevPage" class="nav-btn">← Previous Page</button>
             <div class="page-info">
                 <span>Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
             </div>
-            
-            <button id="nextPage" class="nav-btn">
-                Next Page
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
-            </button>
+            <button id="nextPage" class="nav-btn">Next Page →</button>
         </div>
 
-        <!-- Two Flipbooks Side by Side -->
-        <div class="flipbooks-container">
-            
-            <!-- Model A Flipbook -->
-            <div class="flipbook-wrapper">
-                <div class="flipbook-header">
-                    <h2 id="labelA">Model A</h2>
-                    <button class="btn-vote" data-model="A">Choose Model A</button>
-                </div>
-                
-                <div class="flipbook-stage">
-                    <div class="book-container" id="bookA">
-                        <div class="book" id="flipbookA">
-                            <!-- Pages will be inserted here -->
-                        </div>
+        <div class="flipbook-stage">
+            <div class="book-container">
+                <div class="book" id="flipbook">
                     </div>
-                </div>
             </div>
-            
-            <!-- Model B Flipbook -->
-            <div class="flipbook-wrapper">
-                <div class="flipbook-header">
-                    <h2 id="labelB">Model B</h2>
-                    <button class="btn-vote" data-model="B">Choose Model B</button>
-                </div>
-                
-                <div class="flipbook-stage">
-                    <div class="book-container" id="bookB">
-                        <div class="book" id="flipbookB">
-                            <!-- Pages will be inserted here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-        </div>
-
-    </div>
-
-    <!-- Results Bar -->
-    <div id="resultsBar" class="results-bar">
-        <div class="results-content">
-            <div class="result-item">
-                <span class="result-label">Model A:</span>
-                <span class="result-count" id="countA">0</span>
-            </div>
-            <div class="result-item">
-                <span class="result-label">Model B:</span>
-                <span class="result-count" id="countB">0</span>
-            </div>
-            <button id="resetBtn" class="btn-reset">Reset</button>
         </div>
     </div>
 
