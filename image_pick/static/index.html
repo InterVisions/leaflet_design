@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Retrieval</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f5f5f5;
+      color: #222;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 2rem 1.5rem 1rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 1.2rem; }
+
+    .search-bar {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 0.65rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    input[type="text"]:focus { border-color: #555; }
+
+    button {
+      padding: 0.65rem 1.4rem;
+      font-size: 1rem;
+      background: #222;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:disabled { opacity: 0.5; cursor: default; }
+
+    #status {
+      max-width: 900px;
+      margin: 0.6rem auto 0;
+      padding: 0 1.5rem;
+      font-size: 0.85rem;
+      color: #666;
+      min-height: 1.2em;
+    }
+
+    #grid {
+      max-width: 900px;
+      margin: 1.5rem auto 3rem;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 0.8rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .card img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card .score {
+      padding: 0.35rem 0.6rem;
+      font-size: 0.78rem;
+      color: #555;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Image Retrieval</h1>
+  <div class="search-bar">
+    <input id="query" type="text" placeholder="e.g. a dog running on the beach" />
+    <button id="btn" onclick="search()">Search</button>
+  </div>
+</header>
+
+<div id="status"></div>
+<div id="grid"></div>
+
+<script>
+  const input = document.getElementById('query');
+  const btn = document.getElementById('btn');
+  const status = document.getElementById('status');
+  const grid = document.getElementById('grid');
+
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') search(); });
+
+  async function search() {
+    const query = input.value.trim();
+    if (!query) return;
+
+    btn.disabled = true;
+    status.textContent = 'Searching…';
+    grid.innerHTML = '';
+
+    try {
+      const res = await fetch(`/api/search?query=${encodeURIComponent(query)}&top_k=24`);
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+
+      status.textContent = `${data.indices.length} results for "${query}"`;
+
+      for (let i = 0; i < data.indices.length; i++) {
+        const idx = data.indices[i];
+        const sim = data.similarities[i];
+
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const img = document.createElement('img');
+        img.src = `/api/image/${idx}`;
+        img.alt = `result ${i + 1}`;
+        img.loading = 'lazy';
+
+        const score = document.createElement('div');
+        score.className = 'score';
+        score.textContent = sim.toFixed(3);
+
+        card.appendChild(img);
+        card.appendChild(score);
+        grid.appendChild(card);
+      }
+    } catch (err) {
+      status.textContent = `Error: ${err.message}`;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+</script>
+
+</body>
+</html>
