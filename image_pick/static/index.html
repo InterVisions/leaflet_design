@@ -198,7 +198,40 @@
 
     #clear-btn:hover { background: #e0e0e0; }
 
+    #done-btn {
+      padding: 0.4rem 1rem;
+      font-size: 0.85rem;
+      background: #0071e3;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    #done-btn:hover { background: #005bb5; }
+    #done-btn:disabled { opacity: 0.4; cursor: default; }
+
     #sel-bar.empty { opacity: 0.4; pointer-events: none; }
+
+    #toast {
+      position: fixed;
+      bottom: 4.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a1a1a;
+      color: #fff;
+      padding: 0.5rem 1.2rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      opacity: 0;
+      transition: opacity 0.25s;
+      pointer-events: none;
+      z-index: 200;
+      white-space: nowrap;
+    }
+
+    #toast.show { opacity: 1; }
   </style>
 </head>
 <body>
@@ -221,7 +254,10 @@
   </div>
   <div id="sel-thumbs"></div>
   <button id="clear-btn" onclick="clearSelection()">Clear</button>
+  <button id="done-btn" onclick="submitSelection()">Done</button>
 </div>
+
+<div id="toast"></div>
 
 <script>
   const input    = document.getElementById('query');
@@ -231,6 +267,17 @@
   const selBar   = document.getElementById('sel-bar');
   const selCount = document.getElementById('sel-count');
   const selThumbs = document.getElementById('sel-thumbs');
+  const doneBtn  = document.getElementById('done-btn');
+  const toast    = document.getElementById('toast');
+
+  let toastTimer = null;
+  function showToast(msg, isError = false) {
+    toast.textContent = msg;
+    toast.style.background = isError ? '#c0392b' : '#1a1a1a';
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+  }
 
   input.addEventListener('keydown', e => { if (e.key === 'Enter') search(); });
 
@@ -299,7 +346,6 @@
     updateSelBar();
   }
 
-  // Expose selection for later use (e.g. console or future submission endpoint)
   function getSelectionData() {
     return selection.map(s => ({
       imageIndex: s.imageIndex,
@@ -308,6 +354,30 @@
     }));
   }
   window.getSelectionData = getSelectionData;
+
+  async function submitSelection() {
+    if (!selection.length) return;
+    const prompt = input.value.trim();
+    if (!prompt) { showToast('Search for something first.', true); return; }
+
+    doneBtn.disabled = true;
+    try {
+      const res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, selections: getSelectionData() }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+
+      // Redirect to flipbook with images in user-rank order
+      const ordered = [...selection].sort((a, b) => a.userRank - b.userRank);
+      const indices  = ordered.map(s => s.imageIndex).join(',');
+      window.location.href = `/flipbook?images=${indices}&prompt=${encodeURIComponent(prompt)}`;
+    } catch (err) {
+      showToast(`Error: ${err.message}`, true);
+      doneBtn.disabled = false;
+    }
+  }
 
   async function search() {
     const query = input.value.trim();
@@ -319,7 +389,7 @@
     clearSelection();
 
     try {
-      const res = await fetch(`/api/search?query=${encodeURIComponent(query)}&top_k=24`);
+      const res = await fetch(`/api/search?query=${encodeURIComponent(query)}&top_k=100`);
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
 

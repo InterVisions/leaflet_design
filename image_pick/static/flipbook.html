@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Flipbook</title>
+    <link rel="stylesheet" href="/static/flipbook.css">
+</head>
+<body>
+    <div class="top-bar">
+        <a href="/" class="back-link">← Back to search</a>
+    </div>
+
+    <div id="flipbookView" class="flipbook-view hidden">
+        <div class="nav-controls">
+            <button id="prevPage" class="nav-btn">← Previous</button>
+            <div class="page-info">
+                <span>Page <span id="currentPage">1</span> of 5</span>
+            </div>
+            <button id="nextPage" class="nav-btn">Next →</button>
+        </div>
+
+        <div class="flipbook-stage">
+            <div class="book-container">
+                <div class="book" id="flipbook"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="errorMsg" class="hidden error-msg">
+        <p>No images found. <a href="/">Go back to search and select 9 images.</a></p>
+    </div>
+
+    <script src="/static/flipbook.js"></script>
+</body>
+</html>
