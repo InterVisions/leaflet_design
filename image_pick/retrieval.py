@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import time
 from io import BytesIO
 from pathlib import Path
@@ -12,6 +13,13 @@ from PIL import Image
 
 log = logging.getLogger("retrieval")
 
+DATA_DIR = Path(__file__).parent / "data"
+
+
+def _slug(name: str) -> str:
+    """Turn an arbitrary dataset name into a safe filename stem."""
+    return re.sub(r"[^\w\-]+", "_", name).strip("_")
+
 
 class RetrievalEngine:
     def __init__(self, device: str = "auto"):
@@ -22,6 +30,8 @@ class RetrievalEngine:
         self.dataset: list[Image.Image] = []
         self.image_paths: list[str] = []
         self.image_embeddings: torch.Tensor | None = None
+        self._dataset_name: str = "dataset"
+        self._model_key: str = ""
 
     def load_model(self, model_name: str = "ViT-B-32", pretrained: str = "openai"):
         import open_clip
@@ -32,10 +42,12 @@ class RetrievalEngine:
         )
         self.tokenizer = open_clip.get_tokenizer(model_name)
         self.model.eval()
+        self._model_key = f"{model_name}__{pretrained}"
         log.info(f"Model loaded in {time.time() - t0:.1f}s")
 
     def load_dataset_from_folder(self, folder: str, max_images: int = 2000):
         folder = Path(folder)
+        self._dataset_name = _slug(folder.name)
         extensions = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
         paths = sorted(p for p in folder.rglob("*") if p.suffix.lower() in extensions)[:max_images]
         log.info(f"Loading {len(paths)} images from {folder} …")
@@ -53,6 +65,7 @@ class RetrievalEngine:
                                        max_images: int = 2000,
                                        hf_config: str | None = None):
         from datasets import load_dataset, get_dataset_split_names
+        self._dataset_name = _slug(repo)
         log.info(f"Loading HuggingFace dataset {repo} …")
         t0 = time.time()
         
@@ -102,10 +115,28 @@ class RetrievalEngine:
 
         log.info(f"Loaded {len(self.dataset)} images in {time.time() - t0:.1f}s")
 
+    def _cache_path(self) -> Path:
+        return DATA_DIR / f"{self._dataset_name}.pt"
+
     @torch.no_grad()
     def embed_images(self, batch_size: int = 64):
         if not self.dataset:
             raise RuntimeError("No dataset loaded")
+
+        cache = self._cache_path()
+        if cache.exists():
+            try:
+                saved = torch.load(cache, map_location="cpu", weights_only=True)
+                if (saved.get("model_key") == self._model_key
+                        and saved.get("num_images") == len(self.dataset)):
+                    self.image_embeddings = saved["embeddings"]
+                    log.info(f"Loaded embeddings from cache: {cache} {self.image_embeddings.shape}")
+                    return
+                else:
+                    log.info("Cache exists but is stale (different model or image count) — recomputing")
+            except Exception as e:
+                log.warning(f"Could not read cache {cache}: {e} — recomputing")
+
         log.info(f"Embedding {len(self.dataset)} images …")
         t0 = time.time()
         all_embs = []
@@ -118,6 +149,14 @@ class RetrievalEngine:
                 log.info(f"  {i + len(batch)}/{len(self.dataset)}")
         self.image_embeddings = torch.cat(all_embs, dim=0)
         log.info(f"Image embeddings ready: {self.image_embeddings.shape} in {time.time() - t0:.1f}s")
+
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        torch.save({
+            "embeddings": self.image_embeddings,
+            "num_images": len(self.dataset),
+            "model_key": self._model_key,
+        }, cache)
+        log.info(f"Embeddings saved to {cache}")
 
     @torch.no_grad()
     def retrieve(self, query: str, top_k: int = 20) -> dict:

@@ -12,6 +12,7 @@
       background: #f5f5f5;
       color: #222;
       min-height: 100vh;
+      padding-bottom: 5rem;
     }
 
     header {
@@ -68,11 +69,29 @@
       gap: 0.8rem;
     }
 
+    /* ── Card ── */
     .card {
       background: #fff;
       border-radius: 8px;
-      overflow: hidden;
+      overflow: visible;
       box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      cursor: pointer;
+      position: relative;
+      transition: box-shadow 0.15s, transform 0.1s;
+      /* clip the image but let badge overflow */
+    }
+
+    .card:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.15); }
+
+    .card-inner {
+      border-radius: 8px;
+      overflow: hidden;
+      border: 3px solid transparent;
+      transition: border-color 0.15s;
+    }
+
+    .card.selected .card-inner {
+      border-color: #0071e3;
     }
 
     .card img {
@@ -88,6 +107,98 @@
       color: #555;
       text-align: right;
     }
+
+    /* ── Selection badge (iOS-style) ── */
+    .badge {
+      position: absolute;
+      top: -7px;
+      left: -7px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #0071e3;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      pointer-events: none;
+    }
+
+    /* ── Sticky selection bar ── */
+    #sel-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-top: 1px solid #e0e0e0;
+      padding: 0.6rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      z-index: 100;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.07);
+    }
+
+    #sel-bar .sel-label {
+      font-size: 0.9rem;
+      color: #444;
+      flex: 1;
+    }
+
+    #sel-bar .sel-label strong {
+      color: #0071e3;
+    }
+
+    #sel-thumbs {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .sel-thumb {
+      width: 38px;
+      height: 38px;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .sel-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .sel-thumb .sel-thumb-num {
+      position: absolute;
+      top: 1px;
+      left: 2px;
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+    }
+
+    #clear-btn {
+      padding: 0.4rem 0.9rem;
+      font-size: 0.85rem;
+      background: #f0f0f0;
+      color: #333;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #clear-btn:hover { background: #e0e0e0; }
+
+    #sel-bar.empty { opacity: 0.4; pointer-events: none; }
   </style>
 </head>
 <body>
@@ -103,13 +214,100 @@
 <div id="status"></div>
 <div id="grid"></div>
 
+<!-- sticky bar -->
+<div id="sel-bar" class="empty">
+  <div class="sel-label">
+    Selected: <strong id="sel-count">0</strong> / 9
+  </div>
+  <div id="sel-thumbs"></div>
+  <button id="clear-btn" onclick="clearSelection()">Clear</button>
+</div>
+
 <script>
-  const input = document.getElementById('query');
-  const btn = document.getElementById('btn');
-  const status = document.getElementById('status');
-  const grid = document.getElementById('grid');
+  const input    = document.getElementById('query');
+  const btn      = document.getElementById('btn');
+  const status   = document.getElementById('status');
+  const grid     = document.getElementById('grid');
+  const selBar   = document.getElementById('sel-bar');
+  const selCount = document.getElementById('sel-count');
+  const selThumbs = document.getElementById('sel-thumbs');
 
   input.addEventListener('keydown', e => { if (e.key === 'Enter') search(); });
+
+  // Selection state: ordered list of {imageIndex, modelRank, userRank, cardEl}
+  let selection = [];
+
+  function toggleSelection(card, imageIndex, modelRank) {
+    const existingIdx = selection.findIndex(s => s.imageIndex === imageIndex);
+
+    if (existingIdx !== -1) {
+      // Deselect
+      selection.splice(existingIdx, 1);
+      // Renumber userRank for remaining
+      selection.forEach((s, i) => { s.userRank = i + 1; });
+    } else {
+      if (selection.length >= 9) return;
+      selection.push({ imageIndex, modelRank, userRank: selection.length + 1, cardEl: card });
+    }
+
+    rebuildBadges();
+    updateSelBar();
+  }
+
+  function rebuildBadges() {
+    // Clear all badges and selected states in the grid
+    document.querySelectorAll('.card').forEach(c => {
+      c.classList.remove('selected');
+      const b = c.querySelector('.badge');
+      if (b) b.remove();
+    });
+
+    // Re-apply from current selection
+    selection.forEach(s => {
+      const card = s.cardEl;
+      card.classList.add('selected');
+      const badge = document.createElement('div');
+      badge.className = 'badge';
+      badge.textContent = s.userRank;
+      card.appendChild(badge);
+    });
+  }
+
+  function updateSelBar() {
+    selCount.textContent = selection.length;
+    selBar.classList.toggle('empty', selection.length === 0);
+
+    // Rebuild thumbnails
+    selThumbs.innerHTML = '';
+    selection.forEach(s => {
+      const thumb = document.createElement('div');
+      thumb.className = 'sel-thumb';
+      const img = document.createElement('img');
+      img.src = `/api/image/${s.imageIndex}`;
+      const num = document.createElement('div');
+      num.className = 'sel-thumb-num';
+      num.textContent = s.userRank;
+      thumb.appendChild(img);
+      thumb.appendChild(num);
+      selThumbs.appendChild(thumb);
+    });
+  }
+
+  function clearSelection() {
+    selection = [];
+    rebuildBadges();
+    updateSelBar();
+  }
+
+  // Expose selection for later use (e.g. console or future submission endpoint)
+  function getSelectionData() {
+    return selection.map(s => ({
+      imageIndex: s.imageIndex,
+      modelRank:  s.modelRank,
+      userRank:   s.userRank,
+    }));
+  }
+  window.getSelectionData = getSelectionData;
 
   async function search() {
     const query = input.value.trim();
@@ -118,6 +316,7 @@
     btn.disabled = true;
     status.textContent = 'Searching…';
     grid.innerHTML = '';
+    clearSelection();
 
     try {
       const res = await fetch(`/api/search?query=${encodeURIComponent(query)}&top_k=24`);
@@ -129,21 +328,29 @@
       for (let i = 0; i < data.indices.length; i++) {
         const idx = data.indices[i];
         const sim = data.similarities[i];
+        const modelRank = i + 1;   // 1-based rank from model
 
         const card = document.createElement('div');
         card.className = 'card';
 
+        const inner = document.createElement('div');
+        inner.className = 'card-inner';
+
         const img = document.createElement('img');
         img.src = `/api/image/${idx}`;
-        img.alt = `result ${i + 1}`;
+        img.alt = `result ${modelRank}`;
         img.loading = 'lazy';
 
         const score = document.createElement('div');
         score.className = 'score';
         score.textContent = sim.toFixed(3);
 
-        card.appendChild(img);
-        card.appendChild(score);
+        inner.appendChild(img);
+        inner.appendChild(score);
+        card.appendChild(inner);
+
+        card.addEventListener('click', () => toggleSelection(card, idx, modelRank));
+
         grid.appendChild(card);
       }
     } catch (err) {
