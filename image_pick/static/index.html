@@ -389,7 +389,7 @@
     clearSelection();
 
     try {
-      const res = await fetch(`/api/search?query=${encodeURIComponent(query)}&top_k=100`);
+      const res = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
 

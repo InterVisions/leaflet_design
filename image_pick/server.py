@@ -84,7 +84,7 @@ async def flipbook():
 
 
 @app.get("/api/search")
-async def search(query: str, top_k: int = 20):
+async def search(query: str, top_k: int | None = None):
     if not query.strip():
         raise HTTPException(400, "query cannot be empty")
     return ENGINE.retrieve(query, top_k=top_k)

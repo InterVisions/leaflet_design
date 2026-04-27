@@ -159,13 +159,13 @@ class RetrievalEngine:
         log.info(f"Embeddings saved to {cache}")
 
     @torch.no_grad()
-    def retrieve(self, query: str, top_k: int = 20) -> dict:
+    def retrieve(self, query: str, top_k: int | None = None) -> dict:
         if self.image_embeddings is None:
             raise RuntimeError("Images not embedded yet")
         tokens = self.tokenizer([query]).to(self.device)
         query_emb = F.normalize(self.model.encode_text(tokens), dim=-1).cpu()
         sims = (query_emb @ self.image_embeddings.T).squeeze(0).numpy()
-        ranked = np.argsort(sims)[::-1][:top_k]
+        ranked = np.argsort(sims)[::-1] if top_k is None else np.argsort(sims)[::-1][:top_k]
         return {
             "indices": ranked.tolist(),
             "similarities": [round(float(sims[i]), 4) for i in ranked],
