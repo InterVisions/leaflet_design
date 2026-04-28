@@ -1,3 +1,6 @@
+// i18n.js is loaded before this script in flipbook.html,
+// so window.t() is available synchronously.
+
 const state = {
     currentPageIndex: 0,
     totalPages: 5
@@ -8,14 +11,14 @@ const elements = {
     errorMsg:     document.getElementById('errorMsg'),
     prevPage:     document.getElementById('prevPage'),
     nextPage:     document.getElementById('nextPage'),
-    currentPage:  document.getElementById('currentPage')
+    pageInfo:     document.getElementById('pageInfo')
 };
 
 // Parse URL params
 const params       = new URLSearchParams(window.location.search);
 const rawImages    = params.get('images') || '';
 const imageIndices = rawImages.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
-const prompt       = decodeURIComponent(params.get('prompt') || 'Your Design Vision');
+const prompt       = decodeURIComponent(params.get('prompt') || '');
 
 // Image slot assignment across 5 pages (9 slots total):
 //   Page 0 – Cover   : slot 0
@@ -24,18 +27,17 @@ const prompt       = decodeURIComponent(params.get('prompt') || 'Your Design Vis
 //   Page 3 – Gallery : slots 4, 5, 6
 //   Page 4 – Closing : slots 7, 8
 function imgUrl(slot) {
-    // Cycle through available images if fewer than 9 were selected
     const idx = imageIndices[slot % imageIndices.length];
     return `/api/image/${idx}`;
 }
 
 function buildPageImages(pageIndex) {
     const map = [
-        { 'img-1': imgUrl(0) },                                               // cover
-        { 'img-1': imgUrl(1), 'img-2': imgUrl(2) },                           // feature
-        { 'img-1': imgUrl(3) },                                               // story
-        { 'img-1': imgUrl(4), 'img-2': imgUrl(5), 'img-3': imgUrl(6) },      // gallery
-        { 'img-1': imgUrl(7), 'img-2': imgUrl(8) },                           // closing
+        { 'img-1': imgUrl(0) },
+        { 'img-1': imgUrl(1), 'img-2': imgUrl(2) },
+        { 'img-1': imgUrl(3) },
+        { 'img-1': imgUrl(4), 'img-2': imgUrl(5), 'img-3': imgUrl(6) },
+        { 'img-1': imgUrl(7), 'img-2': imgUrl(8) },
     ];
     return map[pageIndex];
 }
@@ -49,9 +51,9 @@ function createLeafletHTML(images, pageIndex) {
             <div class="leaflet layout-cover">
                 <div class="cover-image"><img src="${images['img-1']}" alt="cover"></div>
                 <div class="cover-overlay">
-                    <span class="cover-tag">Project Overview</span>
-                    <h1 class="cover-title">Design<br>Vision</h1>
-                    <p class="cover-sub">Exploring concepts for: ${prompt}</p>
+                    <span class="cover-tag">${t('leaflet.cover.tag')}</span>
+                    <h1 class="cover-title">${t('leaflet.cover.titleLine1')}<br>${t('leaflet.cover.titleLine2')}</h1>
+                    <p class="cover-sub">${t('leaflet.cover.sub', { prompt })}</p>
                 </div>
             </div>`;
     }
@@ -62,16 +64,16 @@ function createLeafletHTML(images, pageIndex) {
                 <div class="feature-main">
                     <div class="feature-img-wrap"><img src="${images['img-1']}" alt="main"></div>
                     <div class="feature-caption">
-                        <h2>Core Concept</h2>
-                        <p>Focusing on sustainability and modern aesthetics.</p>
+                        <h2>${t('leaflet.feature.heading')}</h2>
+                        <p>${t('leaflet.feature.body')}</p>
                     </div>
                 </div>
                 <div class="feature-side">
                     <div class="feature-side-img"><img src="${images['img-2']}" alt="side"></div>
                     <div class="feature-side-text">
-                        <span class="feature-badge">Detail View</span>
-                        <h3>Material Study</h3>
-                        <p>Natural textures integration.</p>
+                        <span class="feature-badge">${t('leaflet.feature.badge')}</span>
+                        <h3>${t('leaflet.feature.sideHeading')}</h3>
+                        <p>${t('leaflet.feature.sideBody')}</p>
                     </div>
                 </div>
             </div>`;
@@ -82,13 +84,13 @@ function createLeafletHTML(images, pageIndex) {
             <div class="leaflet layout-story">
                 <div class="story-photo">
                     <img src="${images['img-1']}" alt="story">
-                    <span class="story-photo-label">Environmental Context</span>
+                    <span class="story-photo-label">${t('leaflet.story.photoLabel')}</span>
                 </div>
                 <div class="story-body">
-                    <h2 class="story-heading">Harmonious Integration</h2>
+                    <h2 class="story-heading">${t('leaflet.story.heading')}</h2>
                     <div class="story-columns">
-                        <p>The design seamlessly blends the built environment with surrounding natural elements, creating a cohesive visual language.</p>
-                        <p>Light and shadow play a crucial role in defining the spatial experience throughout the day.</p>
+                        <p>${t('leaflet.story.col1')}</p>
+                        <p>${t('leaflet.story.col2')}</p>
                     </div>
                 </div>
             </div>`;
@@ -98,13 +100,13 @@ function createLeafletHTML(images, pageIndex) {
         return `
             <div class="leaflet layout-gallery">
                 <div class="gallery-header">
-                    <h2>Visual Explorations</h2>
-                    <p>Alternative perspectives and interior studies.</p>
+                    <h2>${t('leaflet.gallery.heading')}</h2>
+                    <p>${t('leaflet.gallery.sub')}</p>
                 </div>
                 <div class="gallery-grid">
                     <div class="gallery-item gallery-item-large">
                         <img src="${images['img-1']}" alt="primary">
-                        <span class="gallery-label">Primary Angle</span>
+                        <span class="gallery-label">${t('leaflet.gallery.primaryLabel')}</span>
                     </div>
                     <div class="gallery-item"><img src="${images['img-2']}" alt="detail 1"></div>
                     <div class="gallery-item"><img src="${images['img-3']}" alt="detail 2"></div>
@@ -118,15 +120,15 @@ function createLeafletHTML(images, pageIndex) {
                 <div class="closing-stats">
                     <div class="closing-stats-img"><img src="${images['img-1']}" alt="stats"></div>
                     <div class="closing-numbers">
-                        <div class="stat-block"><span class="stat-n">100%</span><span class="stat-l">Renewable</span></div>
-                        <div class="stat-block"><span class="stat-n">45%</span><span class="stat-l">Green Space</span></div>
+                        <div class="stat-block"><span class="stat-n">${t('leaflet.closing.stat1n')}</span><span class="stat-l">${t('leaflet.closing.stat1l')}</span></div>
+                        <div class="stat-block"><span class="stat-n">${t('leaflet.closing.stat2n')}</span><span class="stat-l">${t('leaflet.closing.stat2l')}</span></div>
                     </div>
                 </div>
                 <div class="closing-cta">
                     <div class="closing-cta-img"><img src="${images['img-2']}" alt="cta"></div>
                     <div class="closing-cta-text">
-                        <h2>Next Steps</h2>
-                        <p>Ready to move this concept into development.</p>
+                        <h2>${t('leaflet.closing.ctaHeading')}</h2>
+                        <p>${t('leaflet.closing.ctaBody')}</p>
                     </div>
                 </div>
             </div>`;
@@ -158,7 +160,10 @@ function flipBook() {
 }
 
 function updateNav() {
-    elements.currentPage.textContent = state.currentPageIndex + 1;
+    elements.pageInfo.textContent = t('flipbook.pageOf', {
+        current: state.currentPageIndex + 1,
+        total:   state.totalPages
+    });
     elements.prevPage.disabled = state.currentPageIndex === 0;
     elements.nextPage.disabled = state.currentPageIndex === state.totalPages - 1;
 }

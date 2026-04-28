@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-i18n-title="meta.title">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Image Retrieval</title>
+  <script src="/static/i18n.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -244,9 +245,18 @@
 
     .back-btn:hover { background: #e0e0e0; }
 
+    .order-footer {
+      padding: 0.75rem 1.5rem;
+      background: #fff;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: flex-end;
+      flex-shrink: 0;
+    }
+
     #confirm-btn {
-      padding: 0.4rem 1rem;
-      font-size: 0.85rem;
+      padding: 0.55rem 1.3rem;
+      font-size: 0.9rem;
       background: #0071e3;
       color: #fff;
       border: none;
@@ -269,13 +279,11 @@
     }
 
     .order-hint {
-      max-width: 900px;
-      margin: 0 auto 0.5rem;
-      padding: 0 0.25rem;
       font-size: 0.8rem;
       color: #888;
       width: 100%;
       grid-column: 1 / -1;
+      padding: 0 0.25rem 0.25rem;
     }
 
     /* ── Draggable order card ── */
@@ -361,10 +369,11 @@
 
 <!-- ── Step 1: Search & Select ── -->
 <header>
-  <h1>Image Retrieval</h1>
+  <h1 data-i18n="meta.title">Image Retrieval</h1>
   <div class="search-bar">
-    <input id="query" type="text" placeholder="e.g. a dog running on the beach" />
-    <button id="btn" onclick="search()">Search</button>
+    <input id="query" type="text" data-i18n-placeholder="search.placeholder"
+           placeholder="e.g. a person running on the beach" />
+    <button id="btn" onclick="search()" data-i18n="search.button">Search</button>
   </div>
 </header>
 
@@ -373,38 +382,42 @@
 
 <div id="sel-bar" class="empty">
   <div class="sel-label">
-    Selected: <strong id="sel-count">0</strong> / 9
+    <span id="sel-label-text">Selected: <strong id="sel-count">0</strong> / 9</span>
   </div>
   <div id="sel-thumbs"></div>
-  <button id="clear-btn" onclick="clearSelection()">Clear</button>
-  <button id="order-btn" onclick="openOrderOverlay()" disabled>Order photos &rarr;</button>
+  <button id="clear-btn" onclick="clearSelection()" data-i18n="select.clearBtn">Clear</button>
+  <button id="order-btn" onclick="openOrderOverlay()" disabled
+          data-i18n="select.orderBtn">Order photos →</button>
 </div>
 
 <!-- ── Step 2: Ordering overlay ── -->
 <div id="order-overlay" class="hidden">
   <div class="order-header">
-    <button class="back-btn" onclick="closeOrderOverlay()">&larr; Back</button>
-    <h2>Drag to rank your photos &mdash; 1 appears first in the flipbook</h2>
-    <button id="confirm-btn" onclick="submitSelection()">Generate flipbook</button>
+    <button class="back-btn" onclick="closeOrderOverlay()"
+            data-i18n="order.backBtn">← Back</button>
+    <h2 data-i18n="order.heading">Drag to rank your photos — 1 appears first in the flipbook</h2>
   </div>
   <div id="order-grid"></div>
+  <div class="order-footer">
+    <button id="confirm-btn" onclick="submitSelection()"
+            data-i18n="order.confirmBtn">Generate flipbook</button>
+  </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-  const input      = document.getElementById('query');
-  const btn        = document.getElementById('btn');
-  const status     = document.getElementById('status');
-  const grid       = document.getElementById('grid');
-  const selBar     = document.getElementById('sel-bar');
-  const selCount   = document.getElementById('sel-count');
-  const selThumbs  = document.getElementById('sel-thumbs');
-  const orderBtn   = document.getElementById('order-btn');
+  const input        = document.getElementById('query');
+  const btn          = document.getElementById('btn');
+  const status       = document.getElementById('status');
+  const grid         = document.getElementById('grid');
+  const selBar       = document.getElementById('sel-bar');
+  const selCount     = document.getElementById('sel-count');
+  const orderBtn     = document.getElementById('order-btn');
   const orderOverlay = document.getElementById('order-overlay');
-  const orderGrid  = document.getElementById('order-grid');
-  const confirmBtn = document.getElementById('confirm-btn');
-  const toast      = document.getElementById('toast');
+  const orderGrid    = document.getElementById('order-grid');
+  const confirmBtn   = document.getElementById('confirm-btn');
+  const toast        = document.getElementById('toast');
 
   let toastTimer = null;
   function showToast(msg, isError = false) {
@@ -422,12 +435,18 @@
   // userRank is NOT assigned here — it comes from step 2.
   let selection = [];
 
+  function updateSelLabel() {
+    // Rebuild the "Selected: N / 9" text using i18n
+    const label = document.getElementById('sel-label-text');
+    label.innerHTML = t('select.count', { n: `<strong id="sel-count">${selection.length}</strong>` });
+  }
+
   function toggleSelection(card, imageIndex, modelRank) {
     const existingIdx = selection.findIndex(s => s.imageIndex === imageIndex);
     if (existingIdx !== -1) {
       selection.splice(existingIdx, 1);
     } else {
-      if (selection.length >= 9) { showToast('Maximum 9 photos selected.'); return; }
+      if (selection.length >= 9) { showToast(t('select.maxReached')); return; }
       selection.push({ imageIndex, modelRank, cardEl: card });
     }
     rebuildBadges();
@@ -450,11 +469,12 @@
   }
 
   function updateSelBar() {
-    selCount.textContent = selection.length;
     const hasAny = selection.length > 0;
     selBar.classList.toggle('empty', !hasAny);
     orderBtn.disabled = !hasAny;
+    updateSelLabel();
 
+    const selThumbs = document.getElementById('sel-thumbs');
     selThumbs.innerHTML = '';
     selection.forEach(s => {
       const thumb = document.createElement('div');
@@ -473,13 +493,11 @@
   }
 
   // ── Step 2: Ordering overlay ──────────────────────────────────────────────
-  // orderedItems: copy of selection array in user-dragged order
   let orderedItems = [];
-  let dragSrcIdx = null;
+  let dragSrcIdx   = null;
 
   function openOrderOverlay() {
     if (!selection.length) return;
-    // Start with selection in the order they were clicked (arbitrary, user will reorder)
     orderedItems = selection.map(s => ({ ...s }));
     renderOrderGrid();
     orderOverlay.classList.remove('hidden');
@@ -496,7 +514,7 @@
 
     const hint = document.createElement('p');
     hint.className = 'order-hint';
-    hint.textContent = 'Drag cards to set the order. Photo 1 will appear first in the flipbook.';
+    hint.textContent = t('order.hint');
     orderGrid.appendChild(hint);
 
     orderedItems.forEach((item, i) => {
@@ -515,7 +533,7 @@
 
       const label = document.createElement('div');
       label.className = 'drag-label';
-      label.textContent = '⠿ drag to reorder';
+      label.textContent = '⠿ ' + t('order.dragLabel');
 
       card.appendChild(badge);
       card.appendChild(img);
@@ -553,7 +571,6 @@
     e.currentTarget.classList.remove('drag-over');
     if (dragSrcIdx === null || dragSrcIdx === targetIdx) return;
 
-    // Reorder: move src to target position
     const [moved] = orderedItems.splice(dragSrcIdx, 1);
     orderedItems.splice(targetIdx, 0, moved);
     dragSrcIdx = null;
@@ -562,7 +579,6 @@
 
   function onDragEnd(e) {
     e.currentTarget.classList.remove('dragging');
-    // Clean up any leftover drag-over states
     orderGrid.querySelectorAll('.order-card').forEach(c => c.classList.remove('drag-over'));
     dragSrcIdx = null;
   }
@@ -571,11 +587,10 @@
   async function submitSelection() {
     if (!orderedItems.length) return;
     const prompt = input.value.trim();
-    if (!prompt) { showToast('Search for something first.', true); return; }
+    if (!prompt) { showToast(t('select.needSearch'), true); return; }
 
     confirmBtn.disabled = true;
     try {
-      // userRank = position in orderedItems (1-based)
       const selections = orderedItems.map((item, i) => ({
         imageIndex: item.imageIndex,
         modelRank:  item.modelRank,
@@ -590,9 +605,10 @@
       if (!res.ok) throw new Error(await res.text());
 
       const indices = orderedItems.map(s => s.imageIndex).join(',');
-      window.location.href = `/flipbook?images=${indices}&prompt=${encodeURIComponent(prompt)}`;
+      const lang    = i18n.getCurrentLocale();
+      window.location.href = `/flipbook?images=${indices}&prompt=${encodeURIComponent(prompt)}&lang=${lang}`;
     } catch (err) {
-      showToast(`Error: ${err.message}`, true);
+      showToast(t('search.error', { msg: err.message }), true);
       confirmBtn.disabled = false;
     }
   }
@@ -603,7 +619,7 @@
     if (!query) return;
 
     btn.disabled = true;
-    status.textContent = 'Searching…';
+    status.textContent = t('search.searching');
     grid.innerHTML = '';
     clearSelection();
 
@@ -612,26 +628,26 @@
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
 
-      status.textContent = `${data.indices.length} results for "${query}"`;
+      status.textContent = t('search.results', { n: data.indices.length, query });
 
       for (let i = 0; i < data.indices.length; i++) {
-        const idx = data.indices[i];
-        const sim = data.similarities[i];
+        const idx       = data.indices[i];
+        const sim       = data.similarities[i];
         const modelRank = i + 1;
 
-        const card = document.createElement('div');
+        const card  = document.createElement('div');
         card.className = 'card';
 
         const inner = document.createElement('div');
         inner.className = 'card-inner';
 
         const img = document.createElement('img');
-        img.src = `/api/image/${idx}`;
-        img.alt = `result ${modelRank}`;
+        img.src     = `/api/image/${idx}`;
+        img.alt     = `result ${modelRank}`;
         img.loading = 'lazy';
 
         const score = document.createElement('div');
-        score.className = 'score';
+        score.className   = 'score';
         score.textContent = sim.toFixed(3);
 
         inner.appendChild(img);
@@ -643,7 +659,7 @@
         grid.appendChild(card);
       }
     } catch (err) {
-      status.textContent = `Error: ${err.message}`;
+      status.textContent = t('search.error', { msg: err.message });
     } finally {
       btn.disabled = false;
     }

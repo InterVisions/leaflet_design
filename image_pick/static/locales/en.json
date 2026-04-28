@@ -1,0 +1,69 @@
+{
+  "meta": {
+    "title": "Image Retrieval"
+  },
+  "search": {
+    "placeholder": "e.g. a person running on the beach",
+    "button": "Search",
+    "searching": "Searching…",
+    "results": "{n} results for “{query}”",
+    "error": "Error: {msg}"
+  },
+  "select": {
+    "count": "Selected: {n} / 9",
+    "maxReached": "Maximum 9 photos selected.",
+    "needSearch": "Search for something first.",
+    "clearBtn": "Clear",
+    "orderBtn": "Order photos →"
+  },
+  "order": {
+    "backBtn": "← Back",
+    "heading": "Drag to rank your photos — 1 appears first in the flipbook",
+    "hint": "Drag cards to set the order. Photo 1 will appear first in the flipbook.",
+    "dragLabel": "drag to reorder",
+    "confirmBtn": "Generate flipbook"
+  },
+  "flipbook": {
+    "title": "Your Flipbook",
+    "backLink": "← Back to search",
+    "prevBtn": "← Previous",
+    "nextBtn": "Next →",
+    "pageOf": "Page {current} of {total}",
+    "noImages": "No images found.",
+    "goBack": "Go back to search and select images."
+  },
+  "leaflet": {
+    "cover": {
+      "tag": "Project Overview",
+      "titleLine1": "Design",
+      "titleLine2": "Vision",
+      "sub": "Exploring concepts for: {prompt}"
+    },
+    "feature": {
+      "heading": "Core Concept",
+      "body": "Focusing on sustainability and modern aesthetics.",
+      "badge": "Detail View",
+      "sideHeading": "Material Study",
+      "sideBody": "Natural textures integration."
+    },
+    "story": {
+      "photoLabel": "Environmental Context",
+      "heading": "Harmonious Integration",
+      "col1": "The design seamlessly blends the built environment with surrounding natural elements, creating a cohesive visual language.",
+      "col2": "Light and shadow play a crucial role in defining the spatial experience throughout the day."
+    },
+    "gallery": {
+      "heading": "Visual Explorations",
+      "sub": "Alternative perspectives and interior studies.",
+      "primaryLabel": "Primary Angle"
+    },
+    "closing": {
+      "stat1n": "100%",
+      "stat1l": "Renewable",
+      "stat2n": "45%",
+      "stat2l": "Green Space",
+      "ctaHeading": "Next Steps",
+      "ctaBody": "Ready to move this concept into development."
+    }
+  }
+}

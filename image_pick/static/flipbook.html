@@ -1,23 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-i18n-title="flipbook.title">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Flipbook</title>
+    <script src="/static/i18n.js"></script>
     <link rel="stylesheet" href="/static/flipbook.css">
 </head>
 <body>
     <div class="top-bar">
-        <a href="/" class="back-link">← Back to search</a>
+        <a href="/" class="back-link" data-i18n="flipbook.backLink">← Back to search</a>
     </div>
 
     <div id="flipbookView" class="flipbook-view hidden">
         <div class="nav-controls">
-            <button id="prevPage" class="nav-btn">← Previous</button>
+            <button id="prevPage" class="nav-btn" data-i18n="flipbook.prevBtn">← Previous</button>
             <div class="page-info">
-                <span>Page <span id="currentPage">1</span> of 5</span>
+                <span id="pageInfo"></span>
             </div>
-            <button id="nextPage" class="nav-btn">Next →</button>
+            <button id="nextPage" class="nav-btn" data-i18n="flipbook.nextBtn">Next →</button>
         </div>
 
         <div class="flipbook-stage">
@@ -28,7 +29,10 @@
     </div>
 
     <div id="errorMsg" class="hidden error-msg">
-        <p>No images found. <a href="/">Go back to search and select 9 images.</a></p>
+        <p>
+            <span data-i18n="flipbook.noImages">No images found.</span>
+            <a href="/" data-i18n="flipbook.goBack">Go back to search and select images.</a>
+        </p>
     </div>
 
     <script src="/static/flipbook.js"></script>

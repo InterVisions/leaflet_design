@@ -1,0 +1,69 @@
+{
+  "meta": {
+    "title": "Recuperación de imágenes"
+  },
+  "search": {
+    "placeholder": "p. ej. una persona corriendo en la playa",
+    "button": "Buscar",
+    "searching": "Buscando…",
+    "results": "{n} resultados para «{query}»",
+    "error": "Error: {msg}"
+  },
+  "select": {
+    "count": "Seleccionadas: {n} / 9",
+    "maxReached": "Máximo 9 fotos seleccionadas.",
+    "needSearch": "Primero realiza una búsqueda.",
+    "clearBtn": "Borrar",
+    "orderBtn": "Ordenar fotos →"
+  },
+  "order": {
+    "backBtn": "← Volver",
+    "heading": "Arrastra para ordenar las fotos — la 1 aparece primero en el folleto",
+    "hint": "Arrastra las tarjetas para establecer el orden. La foto 1 aparecerá primero en el folleto.",
+    "dragLabel": "arrastra para reordenar",
+    "confirmBtn": "Generar folleto"
+  },
+  "flipbook": {
+    "title": "Tu folleto",
+    "backLink": "← Volver a la búsqueda",
+    "prevBtn": "← Anterior",
+    "nextBtn": "Siguiente →",
+    "pageOf": "Página {current} de {total}",
+    "noImages": "No se han encontrado imágenes.",
+    "goBack": "Vuelve a la búsqueda y selecciona imágenes."
+  },
+  "leaflet": {
+    "cover": {
+      "tag": "Presentación del proyecto",
+      "titleLine1": "Visión",
+      "titleLine2": "del diseño",
+      "sub": "Explorando conceptos para: {prompt}"
+    },
+    "feature": {
+      "heading": "Concepto central",
+      "body": "Con foco en la sostenibilidad y la estética contemporánea.",
+      "badge": "Vista de detalle",
+      "sideHeading": "Estudio de materiales",
+      "sideBody": "Integración de texturas naturales."
+    },
+    "story": {
+      "photoLabel": "Contexto ambiental",
+      "heading": "Integración armoniosa",
+      "col1": "El diseño integra el entorno construido con los elementos naturales circundantes, generando un lenguaje visual cohesionado.",
+      "col2": "La luz y la sombra desempeñan un papel fundamental en la definición de la experiencia espacial a lo largo del día."
+    },
+    "gallery": {
+      "heading": "Exploraciones visuales",
+      "sub": "Perspectivas alternativas y estudios de interior.",
+      "primaryLabel": "Ángulo principal"
+    },
+    "closing": {
+      "stat1n": "100%",
+      "stat1l": "Renovable",
+      "stat2n": "45%",
+      "stat2l": "Zonas verdes",
+      "ctaHeading": "Próximos pasos",
+      "ctaBody": "Listos para llevar este concepto a la fase de desarrollo."
+    }
+  }
+}
