@@ -34,36 +34,36 @@
   },
   "leaflet": {
     "cover": {
-      "tag": "Project Overview",
-      "titleLine1": "Design",
-      "titleLine2": "Vision",
-      "sub": "Exploring concepts for: {prompt}"
+      "tag": "Community Initiative",
+      "titleLine1": "Our",
+      "titleLine2": "Neighbourhood",
+      "sub": "Exploring: {prompt}"
     },
     "feature": {
-      "heading": "Core Concept",
-      "body": "Focusing on sustainability and modern aesthetics.",
-      "badge": "Detail View",
-      "sideHeading": "Material Study",
-      "sideBody": "Natural textures integration."
+      "heading": "Shared Vision",
+      "body": "We are shaping spaces that work for everyone — built on listening, inclusion, and collective care.",
+      "badge": "Closer Look",
+      "sideHeading": "Design for Everyone",
+      "sideBody": "Accessible environments shaped by the needs of the whole community."
     },
     "story": {
-      "photoLabel": "Environmental Context",
-      "heading": "Harmonious Integration",
-      "col1": "The design seamlessly blends the built environment with surrounding natural elements, creating a cohesive visual language.",
-      "col2": "Light and shadow play a crucial role in defining the spatial experience throughout the day."
+      "photoLabel": "Our Community",
+      "heading": "Living Together",
+      "col1": "Our shared spaces reflect what we value: inclusion, sustainability, and a commitment to the wellbeing of all who live here.",
+      "col2": "When every voice is heard, the spaces we share become truly ours."
     },
     "gallery": {
-      "heading": "Visual Explorations",
-      "sub": "Alternative perspectives and interior studies.",
-      "primaryLabel": "Primary Angle"
+      "heading": "Community Perspectives",
+      "sub": "Different views, one shared vision.",
+      "primaryLabel": "Featured Image"
     },
     "closing": {
       "stat1n": "100%",
-      "stat1l": "Renewable",
-      "stat2n": "45%",
-      "stat2l": "Green Space",
-      "ctaHeading": "Next Steps",
-      "ctaBody": "Ready to move this concept into development."
+      "stat1l": "Community-led",
+      "stat2n": "Free",
+      "stat2l": "Open to all",
+      "ctaHeading": "Get Involved",
+      "ctaBody": "Your voice shapes our shared future. Join the conversation."
     }
   }
 }

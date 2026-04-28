@@ -34,36 +34,36 @@
   },
   "leaflet": {
     "cover": {
-      "tag": "Presentación del proyecto",
-      "titleLine1": "Visión",
-      "titleLine2": "del diseño",
-      "sub": "Explorando conceptos para: {prompt}"
+      "tag": "Iniciativa comunitaria",
+      "titleLine1": "Nuestro",
+      "titleLine2": "Vecindario",
+      "sub": "Explorando: {prompt}"
     },
     "feature": {
-      "heading": "Concepto central",
-      "body": "Con foco en la sostenibilidad y la estética contemporánea.",
+      "heading": "Visión compartida",
+      "body": "Estamos construyendo espacios que funcionan para toda la ciudadanía, desde la escucha, la inclusión y el cuidado colectivo.",
       "badge": "Vista de detalle",
-      "sideHeading": "Estudio de materiales",
-      "sideBody": "Integración de texturas naturales."
+      "sideHeading": "Diseño para todas las personas",
+      "sideBody": "Entornos accesibles, pensados desde las necesidades del vecindario."
     },
     "story": {
-      "photoLabel": "Contexto ambiental",
-      "heading": "Integración armoniosa",
-      "col1": "El diseño integra el entorno construido con los elementos naturales circundantes, generando un lenguaje visual cohesionado.",
-      "col2": "La luz y la sombra desempeñan un papel fundamental en la definición de la experiencia espacial a lo largo del día."
+      "photoLabel": "Nuestra comunidad",
+      "heading": "Convivencia",
+      "col1": "Nuestros espacios comunes reflejan lo que valoramos: inclusión, sostenibilidad y compromiso con el bienestar de quienes vivimos aquí.",
+      "col2": "Cuando se escucha a todas las personas, los espacios que compartimos se convierten verdaderamente en nuestros."
     },
     "gallery": {
-      "heading": "Exploraciones visuales",
-      "sub": "Perspectivas alternativas y estudios de interior.",
-      "primaryLabel": "Ángulo principal"
+      "heading": "Perspectivas del vecindario",
+      "sub": "Distintas miradas, una visión compartida.",
+      "primaryLabel": "Imagen destacada"
     },
     "closing": {
       "stat1n": "100%",
-      "stat1l": "Renovable",
-      "stat2n": "45%",
-      "stat2l": "Zonas verdes",
-      "ctaHeading": "Próximos pasos",
-      "ctaBody": "Listos para llevar este concepto a la fase de desarrollo."
+      "stat1l": "Gratuito",
+      "stat2n": "80%",
+      "stat2l": "Aumento en zonas verdes",
+      "ctaHeading": "Participa",
+      "ctaBody": "Tu voz da forma a nuestro futuro común. Únete a la conversación."
     }
   }
 }
