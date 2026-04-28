@@ -78,7 +78,6 @@
       cursor: pointer;
       position: relative;
       transition: box-shadow 0.15s, transform 0.1s;
-      /* clip the image but let badge overflow */
     }
 
     .card:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.15); }
@@ -108,7 +107,7 @@
       text-align: right;
     }
 
-    /* ── Selection badge (iOS-style) ── */
+    /* ── Selection badge (checkmark, step 1) ── */
     .badge {
       position: absolute;
       top: -7px;
@@ -118,7 +117,7 @@
       border-radius: 50%;
       background: #0071e3;
       color: #fff;
-      font-size: 0.8rem;
+      font-size: 0.9rem;
       font-weight: 700;
       display: flex;
       align-items: center;
@@ -165,7 +164,6 @@
       height: 38px;
       border-radius: 6px;
       overflow: hidden;
-      position: relative;
       flex-shrink: 0;
     }
 
@@ -174,16 +172,6 @@
       height: 100%;
       object-fit: cover;
       display: block;
-    }
-
-    .sel-thumb .sel-thumb-num {
-      position: absolute;
-      top: 1px;
-      left: 2px;
-      font-size: 0.6rem;
-      font-weight: 700;
-      color: #fff;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.7);
     }
 
     #clear-btn {
@@ -198,7 +186,7 @@
 
     #clear-btn:hover { background: #e0e0e0; }
 
-    #done-btn {
+    #order-btn {
       padding: 0.4rem 1rem;
       font-size: 0.85rem;
       background: #0071e3;
@@ -209,11 +197,146 @@
       font-weight: 600;
     }
 
-    #done-btn:hover { background: #005bb5; }
-    #done-btn:disabled { opacity: 0.4; cursor: default; }
+    #order-btn:hover { background: #005bb5; }
+    #order-btn:disabled { opacity: 0.4; cursor: default; }
 
     #sel-bar.empty { opacity: 0.4; pointer-events: none; }
 
+    /* ── Step 2: Ordering overlay ── */
+    #order-overlay {
+      position: fixed;
+      inset: 0;
+      background: #f5f5f5;
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #order-overlay.hidden { display: none; }
+
+    .order-header {
+      padding: 1rem 1.5rem;
+      background: #fff;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-shrink: 0;
+    }
+
+    .order-header h2 {
+      flex: 1;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .back-btn {
+      padding: 0.4rem 0.9rem;
+      font-size: 0.85rem;
+      background: #f0f0f0;
+      color: #333;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .back-btn:hover { background: #e0e0e0; }
+
+    #confirm-btn {
+      padding: 0.4rem 1rem;
+      font-size: 0.85rem;
+      background: #0071e3;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    #confirm-btn:hover { background: #005bb5; }
+    #confirm-btn:disabled { opacity: 0.4; cursor: default; }
+
+    #order-grid {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+      align-content: start;
+    }
+
+    .order-hint {
+      max-width: 900px;
+      margin: 0 auto 0.5rem;
+      padding: 0 0.25rem;
+      font-size: 0.8rem;
+      color: #888;
+      width: 100%;
+      grid-column: 1 / -1;
+    }
+
+    /* ── Draggable order card ── */
+    .order-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      cursor: grab;
+      position: relative;
+      user-select: none;
+      transition: box-shadow 0.15s, opacity 0.15s, transform 0.1s;
+      border: 3px solid transparent;
+    }
+
+    .order-card:active { cursor: grabbing; }
+
+    .order-card.dragging {
+      opacity: 0.35;
+      transform: scale(0.97);
+    }
+
+    .order-card.drag-over {
+      border-color: #0071e3;
+      box-shadow: 0 0 0 2px #0071e380;
+    }
+
+    .order-card img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 6px 6px 0 0;
+      display: block;
+      pointer-events: none;
+    }
+
+    .order-card .rank-badge {
+      position: absolute;
+      top: -9px;
+      left: -9px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #0071e3;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      pointer-events: none;
+    }
+
+    .order-card .drag-label {
+      padding: 0.3rem 0.6rem 0.35rem;
+      font-size: 0.72rem;
+      color: #999;
+      text-align: center;
+    }
+
+    /* ── Toast ── */
     #toast {
       position: fixed;
       bottom: 4.5rem;
@@ -227,7 +350,7 @@
       opacity: 0;
       transition: opacity 0.25s;
       pointer-events: none;
-      z-index: 200;
+      z-index: 400;
       white-space: nowrap;
     }
 
@@ -236,6 +359,7 @@
 </head>
 <body>
 
+<!-- ── Step 1: Search & Select ── -->
 <header>
   <h1>Image Retrieval</h1>
   <div class="search-bar">
@@ -247,28 +371,40 @@
 <div id="status"></div>
 <div id="grid"></div>
 
-<!-- sticky bar -->
 <div id="sel-bar" class="empty">
   <div class="sel-label">
     Selected: <strong id="sel-count">0</strong> / 9
   </div>
   <div id="sel-thumbs"></div>
   <button id="clear-btn" onclick="clearSelection()">Clear</button>
-  <button id="done-btn" onclick="submitSelection()">Done</button>
+  <button id="order-btn" onclick="openOrderOverlay()" disabled>Order photos &rarr;</button>
+</div>
+
+<!-- ── Step 2: Ordering overlay ── -->
+<div id="order-overlay" class="hidden">
+  <div class="order-header">
+    <button class="back-btn" onclick="closeOrderOverlay()">&larr; Back</button>
+    <h2>Drag to rank your photos &mdash; 1 appears first in the flipbook</h2>
+    <button id="confirm-btn" onclick="submitSelection()">Generate flipbook</button>
+  </div>
+  <div id="order-grid"></div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-  const input    = document.getElementById('query');
-  const btn      = document.getElementById('btn');
-  const status   = document.getElementById('status');
-  const grid     = document.getElementById('grid');
-  const selBar   = document.getElementById('sel-bar');
-  const selCount = document.getElementById('sel-count');
-  const selThumbs = document.getElementById('sel-thumbs');
-  const doneBtn  = document.getElementById('done-btn');
-  const toast    = document.getElementById('toast');
+  const input      = document.getElementById('query');
+  const btn        = document.getElementById('btn');
+  const status     = document.getElementById('status');
+  const grid       = document.getElementById('grid');
+  const selBar     = document.getElementById('sel-bar');
+  const selCount   = document.getElementById('sel-count');
+  const selThumbs  = document.getElementById('sel-thumbs');
+  const orderBtn   = document.getElementById('order-btn');
+  const orderOverlay = document.getElementById('order-overlay');
+  const orderGrid  = document.getElementById('order-grid');
+  const confirmBtn = document.getElementById('confirm-btn');
+  const toast      = document.getElementById('toast');
 
   let toastTimer = null;
   function showToast(msg, isError = false) {
@@ -281,61 +417,51 @@
 
   input.addEventListener('keydown', e => { if (e.key === 'Enter') search(); });
 
-  // Selection state: ordered list of {imageIndex, modelRank, userRank, cardEl}
+  // ── Step 1 state ──────────────────────────────────────────────────────────
+  // selection: unordered set of {imageIndex, modelRank, cardEl}
+  // userRank is NOT assigned here — it comes from step 2.
   let selection = [];
 
   function toggleSelection(card, imageIndex, modelRank) {
     const existingIdx = selection.findIndex(s => s.imageIndex === imageIndex);
-
     if (existingIdx !== -1) {
-      // Deselect
       selection.splice(existingIdx, 1);
-      // Renumber userRank for remaining
-      selection.forEach((s, i) => { s.userRank = i + 1; });
     } else {
-      if (selection.length >= 9) return;
-      selection.push({ imageIndex, modelRank, userRank: selection.length + 1, cardEl: card });
+      if (selection.length >= 9) { showToast('Maximum 9 photos selected.'); return; }
+      selection.push({ imageIndex, modelRank, cardEl: card });
     }
-
     rebuildBadges();
     updateSelBar();
   }
 
   function rebuildBadges() {
-    // Clear all badges and selected states in the grid
     document.querySelectorAll('.card').forEach(c => {
       c.classList.remove('selected');
       const b = c.querySelector('.badge');
       if (b) b.remove();
     });
-
-    // Re-apply from current selection
     selection.forEach(s => {
-      const card = s.cardEl;
-      card.classList.add('selected');
+      s.cardEl.classList.add('selected');
       const badge = document.createElement('div');
       badge.className = 'badge';
-      badge.textContent = s.userRank;
-      card.appendChild(badge);
+      badge.textContent = '✓';
+      s.cardEl.appendChild(badge);
     });
   }
 
   function updateSelBar() {
     selCount.textContent = selection.length;
-    selBar.classList.toggle('empty', selection.length === 0);
+    const hasAny = selection.length > 0;
+    selBar.classList.toggle('empty', !hasAny);
+    orderBtn.disabled = !hasAny;
 
-    // Rebuild thumbnails
     selThumbs.innerHTML = '';
     selection.forEach(s => {
       const thumb = document.createElement('div');
       thumb.className = 'sel-thumb';
       const img = document.createElement('img');
       img.src = `/api/image/${s.imageIndex}`;
-      const num = document.createElement('div');
-      num.className = 'sel-thumb-num';
-      num.textContent = s.userRank;
       thumb.appendChild(img);
-      thumb.appendChild(num);
       selThumbs.appendChild(thumb);
     });
   }
@@ -346,39 +472,132 @@
     updateSelBar();
   }
 
-  function getSelectionData() {
-    return selection.map(s => ({
-      imageIndex: s.imageIndex,
-      modelRank:  s.modelRank,
-      userRank:   s.userRank,
-    }));
-  }
-  window.getSelectionData = getSelectionData;
+  // ── Step 2: Ordering overlay ──────────────────────────────────────────────
+  // orderedItems: copy of selection array in user-dragged order
+  let orderedItems = [];
+  let dragSrcIdx = null;
 
-  async function submitSelection() {
+  function openOrderOverlay() {
     if (!selection.length) return;
+    // Start with selection in the order they were clicked (arbitrary, user will reorder)
+    orderedItems = selection.map(s => ({ ...s }));
+    renderOrderGrid();
+    orderOverlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeOrderOverlay() {
+    orderOverlay.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  function renderOrderGrid() {
+    orderGrid.innerHTML = '';
+
+    const hint = document.createElement('p');
+    hint.className = 'order-hint';
+    hint.textContent = 'Drag cards to set the order. Photo 1 will appear first in the flipbook.';
+    orderGrid.appendChild(hint);
+
+    orderedItems.forEach((item, i) => {
+      const card = document.createElement('div');
+      card.className = 'order-card';
+      card.draggable = true;
+      card.dataset.idx = i;
+
+      const badge = document.createElement('div');
+      badge.className = 'rank-badge';
+      badge.textContent = i + 1;
+
+      const img = document.createElement('img');
+      img.src = `/api/image/${item.imageIndex}`;
+      img.alt = `photo ${i + 1}`;
+
+      const label = document.createElement('div');
+      label.className = 'drag-label';
+      label.textContent = '⠿ drag to reorder';
+
+      card.appendChild(badge);
+      card.appendChild(img);
+      card.appendChild(label);
+
+      card.addEventListener('dragstart', onDragStart);
+      card.addEventListener('dragover',  onDragOver);
+      card.addEventListener('dragleave', onDragLeave);
+      card.addEventListener('drop',      onDrop);
+      card.addEventListener('dragend',   onDragEnd);
+
+      orderGrid.appendChild(card);
+    });
+  }
+
+  function onDragStart(e) {
+    dragSrcIdx = parseInt(e.currentTarget.dataset.idx);
+    e.currentTarget.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  }
+
+  function onDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.currentTarget.classList.add('drag-over');
+  }
+
+  function onDragLeave(e) {
+    e.currentTarget.classList.remove('drag-over');
+  }
+
+  function onDrop(e) {
+    e.preventDefault();
+    const targetIdx = parseInt(e.currentTarget.dataset.idx);
+    e.currentTarget.classList.remove('drag-over');
+    if (dragSrcIdx === null || dragSrcIdx === targetIdx) return;
+
+    // Reorder: move src to target position
+    const [moved] = orderedItems.splice(dragSrcIdx, 1);
+    orderedItems.splice(targetIdx, 0, moved);
+    dragSrcIdx = null;
+    renderOrderGrid();
+  }
+
+  function onDragEnd(e) {
+    e.currentTarget.classList.remove('dragging');
+    // Clean up any leftover drag-over states
+    orderGrid.querySelectorAll('.order-card').forEach(c => c.classList.remove('drag-over'));
+    dragSrcIdx = null;
+  }
+
+  // ── Submit (from step 2) ──────────────────────────────────────────────────
+  async function submitSelection() {
+    if (!orderedItems.length) return;
     const prompt = input.value.trim();
     if (!prompt) { showToast('Search for something first.', true); return; }
 
-    doneBtn.disabled = true;
+    confirmBtn.disabled = true;
     try {
+      // userRank = position in orderedItems (1-based)
+      const selections = orderedItems.map((item, i) => ({
+        imageIndex: item.imageIndex,
+        modelRank:  item.modelRank,
+        userRank:   i + 1,
+      }));
+
       const res = await fetch('/api/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, selections: getSelectionData() }),
+        body: JSON.stringify({ prompt, selections }),
       });
       if (!res.ok) throw new Error(await res.text());
 
-      // Redirect to flipbook with images in user-rank order
-      const ordered = [...selection].sort((a, b) => a.userRank - b.userRank);
-      const indices  = ordered.map(s => s.imageIndex).join(',');
+      const indices = orderedItems.map(s => s.imageIndex).join(',');
       window.location.href = `/flipbook?images=${indices}&prompt=${encodeURIComponent(prompt)}`;
     } catch (err) {
       showToast(`Error: ${err.message}`, true);
-      doneBtn.disabled = false;
+      confirmBtn.disabled = false;
     }
   }
 
+  // ── Search ────────────────────────────────────────────────────────────────
   async function search() {
     const query = input.value.trim();
     if (!query) return;
@@ -398,7 +617,7 @@
       for (let i = 0; i < data.indices.length; i++) {
         const idx = data.indices[i];
         const sim = data.similarities[i];
-        const modelRank = i + 1;   // 1-based rank from model
+        const modelRank = i + 1;
 
         const card = document.createElement('div');
         card.className = 'card';
