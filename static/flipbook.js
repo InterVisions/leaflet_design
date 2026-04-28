@@ -1,106 +1,96 @@
-// State
+// i18n.js is loaded before this script in flipbook.html,
+// so window.t() is available synchronously.
+
 const state = {
-    pages: [],
     currentPageIndex: 0,
-    totalPages: 5 // Hardcoded to exactly 5
+    totalPages: 5
 };
 
 const elements = {
-    generateBtn: document.getElementById('generateBtn'),
     flipbookView: document.getElementById('flipbookView'),
-    prevPage: document.getElementById('prevPage'),
-    nextPage: document.getElementById('nextPage'),
-    currentPage: document.getElementById('currentPage')
+    errorMsg:     document.getElementById('errorMsg'),
+    prevPage:     document.getElementById('prevPage'),
+    nextPage:     document.getElementById('nextPage'),
+    pageInfo:     document.getElementById('pageInfo')
 };
 
-// Fixed content prompt since the input is gone
-const FIXED_PROMPT = "Modern architecture integrated with nature";
+// Parse URL params
+const params       = new URLSearchParams(window.location.search);
+const rawImages    = params.get('images') || '';
+const imageIndices = rawImages.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+const prompt       = decodeURIComponent(params.get('prompt') || '');
 
-// Image placeholder generator
-function generatePlaceholder(slotId, pageNum) {
-    const canvas = document.createElement('canvas');
-    canvas.width = 600; canvas.height = 800; 
-    const ctx = canvas.getContext('2d');
-    const hue = 140; 
-    const variation = (parseInt(slotId.split('-')[1]) * 20) + (pageNum * 15);
-    
-    const gradient = ctx.createLinearGradient(0, 0, 600, 800);
-    gradient.addColorStop(0, `hsl(${hue + variation}, 40%, 65%)`);
-    gradient.addColorStop(1, `hsl(${hue + variation}, 40%, 35%)`);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 600, 800);
-    
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-    for (let i = 0; i < 20; i++) {
-        ctx.beginPath();
-        ctx.arc(Math.random() * 600, Math.random() * 800, Math.random() * 60 + 20, 0, Math.PI * 2);
-        ctx.fill();
-    }
-    
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.font = 'bold 36px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(`Image ${slotId.split('-')[1]}`, 300, 400);
-    return canvas.toDataURL('image/jpeg');
+// Image slot assignment across 5 pages (9 slots total):
+//   Page 0 – Cover   : slot 0
+//   Page 1 – Feature : slots 1, 2
+//   Page 2 – Story   : slot 3
+//   Page 3 – Gallery : slots 4, 5, 6
+//   Page 4 – Closing : slots 7, 8
+function imgUrl(slot) {
+    const idx = imageIndices[slot % imageIndices.length];
+    return `/api/image/${idx}`;
 }
 
-// 5 Layouts for the 5 pages
-const PAGE_LAYOUTS = [
-    { name: 'cover' },
-    { name: 'feature' },
-    { name: 'story' },
-    { name: 'gallery' },
-    { name: 'closing' }
-];
+function buildPageImages(pageIndex) {
+    const map = [
+        { 'img-1': imgUrl(0) },
+        { 'img-1': imgUrl(1), 'img-2': imgUrl(2) },
+        { 'img-1': imgUrl(3) },
+        { 'img-1': imgUrl(4), 'img-2': imgUrl(5), 'img-3': imgUrl(6) },
+        { 'img-1': imgUrl(7), 'img-2': imgUrl(8) },
+    ];
+    return map[pageIndex];
+}
 
 function createLeafletHTML(images, pageIndex) {
-    const layout = PAGE_LAYOUTS[pageIndex].name;
-    
+    const layouts = ['cover', 'feature', 'story', 'gallery', 'closing'];
+    const layout  = layouts[pageIndex];
+
     if (layout === 'cover') {
         return `
             <div class="leaflet layout-cover">
-                <div class="cover-image"><img src="${images['img-1']}"></div>
+                <div class="cover-image"><img src="${images['img-1']}" alt="cover"></div>
                 <div class="cover-overlay">
-                    <span class="cover-tag">Project Overview</span>
-                    <h1 class="cover-title">Design<br>Vision</h1>
-                    <p class="cover-sub">Exploring concepts for: ${FIXED_PROMPT}</p>
+                    <span class="cover-tag">${t('leaflet.cover.tag')}</span>
+                    <h1 class="cover-title">${t('leaflet.cover.titleLine1')}<br>${t('leaflet.cover.titleLine2')}</h1>
+                    <p class="cover-sub">${t('leaflet.cover.sub', { prompt })}</p>
                 </div>
             </div>`;
     }
-    
+
     if (layout === 'feature') {
         return `
             <div class="leaflet layout-feature">
                 <div class="feature-main">
-                    <div class="feature-img-wrap"><img src="${images['img-1']}"></div>
+                    <div class="feature-img-wrap"><img src="${images['img-1']}" alt="main"></div>
                     <div class="feature-caption">
-                        <h2>Core Concept</h2>
-                        <p>Focusing on sustainability and modern aesthetics.</p>
+                        <h2>${t('leaflet.feature.heading')}</h2>
+                        <p>${t('leaflet.feature.body')}</p>
                     </div>
                 </div>
                 <div class="feature-side">
-                    <div class="feature-side-img"><img src="${images['img-2']}"></div>
+                    <div class="feature-side-img"><img src="${images['img-2']}" alt="side"></div>
                     <div class="feature-side-text">
-                        <span class="feature-badge">Detail View</span>
-                        <h3>Material Study</h3>
-                        <p>Natural textures integration.</p>
+                        <span class="feature-badge">${t('leaflet.feature.badge')}</span>
+                        <h3>${t('leaflet.feature.sideHeading')}</h3>
+                        <p>${t('leaflet.feature.sideBody')}</p>
                     </div>
                 </div>
             </div>`;
     }
-    
+
     if (layout === 'story') {
         return `
             <div class="leaflet layout-story">
                 <div class="story-photo">
-                    <img src="${images['img-1']}">
-                    <span class="story-photo-label">Environmental Context</span>
+                    <img src="${images['img-1']}" alt="story">
+                    <span class="story-photo-label">${t('leaflet.story.photoLabel')}</span>
                 </div>
                 <div class="story-body">
-                    <h2 class="story-heading">Harmonious Integration</h2>
+                    <h2 class="story-heading">${t('leaflet.story.heading')}</h2>
                     <div class="story-columns">
-                        <p>The design seamlessly blends the built environment with surrounding natural elements, creating a cohesive visual language.</p>
-                        <p>Light and shadow play a crucial role in defining the spatial experience throughout the day.</p>
+                        <p>${t('leaflet.story.col1')}</p>
+                        <p>${t('leaflet.story.col2')}</p>
                     </div>
                 </div>
             </div>`;
@@ -110,16 +100,16 @@ function createLeafletHTML(images, pageIndex) {
         return `
             <div class="leaflet layout-gallery">
                 <div class="gallery-header">
-                    <h2>Visual Explorations</h2>
-                    <p>Alternative perspectives and interior studies.</p>
+                    <h2>${t('leaflet.gallery.heading')}</h2>
+                    <p>${t('leaflet.gallery.sub')}</p>
                 </div>
                 <div class="gallery-grid">
                     <div class="gallery-item gallery-item-large">
-                        <img src="${images['img-1']}">
-                        <span class="gallery-label">Primary Angle</span>
+                        <img src="${images['img-1']}" alt="primary">
+                        <span class="gallery-label">${t('leaflet.gallery.primaryLabel')}</span>
                     </div>
-                    <div class="gallery-item"><img src="${images['img-2']}"></div>
-                    <div class="gallery-item"><img src="${images['img-3']}"></div>
+                    <div class="gallery-item"><img src="${images['img-2']}" alt="detail 1"></div>
+                    <div class="gallery-item"><img src="${images['img-3']}" alt="detail 2"></div>
                 </div>
             </div>`;
     }
@@ -128,92 +118,72 @@ function createLeafletHTML(images, pageIndex) {
         return `
             <div class="leaflet layout-closing">
                 <div class="closing-stats">
-                    <div class="closing-stats-img"><img src="${images['img-1']}"></div>
+                    <div class="closing-stats-img"><img src="${images['img-1']}" alt="stats"></div>
                     <div class="closing-numbers">
-                        <div class="stat-block"><span class="stat-n">100%</span><span class="stat-l">Renewable</span></div>
-                        <div class="stat-block"><span class="stat-n">45%</span><span class="stat-l">Green Space</span></div>
+                        <div class="stat-block"><span class="stat-n">${t('leaflet.closing.stat1n')}</span><span class="stat-l">${t('leaflet.closing.stat1l')}</span></div>
+                        <div class="stat-block"><span class="stat-n">${t('leaflet.closing.stat2n')}</span><span class="stat-l">${t('leaflet.closing.stat2l')}</span></div>
                     </div>
                 </div>
                 <div class="closing-cta">
-                    <div class="closing-cta-img"><img src="${images['img-2']}"></div>
+                    <div class="closing-cta-img"><img src="${images['img-2']}" alt="cta"></div>
                     <div class="closing-cta-text">
-                        <h2>Next Steps</h2>
-                        <p>Ready to move this concept into development.</p>
+                        <h2>${t('leaflet.closing.ctaHeading')}</h2>
+                        <p>${t('leaflet.closing.ctaBody')}</p>
                     </div>
                 </div>
             </div>`;
     }
 }
 
-async function generateFlipbook() {
-    elements.generateBtn.disabled = true;
-    elements.generateBtn.textContent = 'Generating...';
-    
-    // Fake loading delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    const pages = [];
-    for (let i = 0; i < state.totalPages; i++) {
-        const page = { id: i, images: {} };
-        ['img-1', 'img-2', 'img-3'].forEach(slotId => {
-            page.images[slotId] = generatePlaceholder(slotId, i);
-        });
-        pages.push(page);
-    }
-    
-    state.pages = pages;
-    state.currentPageIndex = 0;
-    
-    buildFlipbook('flipbook', pages);
-    
-    elements.flipbookView.classList.remove('hidden');
-    updatePageNavigation();
-    
-    elements.generateBtn.disabled = false;
-    elements.generateBtn.textContent = 'Generate Flipbook';
-    
-    // Smoothly reveal the book
-    elements.flipbookView.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function buildFlipbook(containerId, pages) {
-    const container = document.getElementById(containerId);
+function buildFlipbook(pages) {
+    const container = document.getElementById('flipbook');
     container.innerHTML = '';
-    
     pages.forEach((page, index) => {
         const pageEl = document.createElement('div');
         pageEl.className = 'page';
-        pageEl.style.zIndex = pages.length - index; 
-        
+        pageEl.style.zIndex = pages.length - index;
+
         const content = document.createElement('div');
         content.className = 'page-content';
-        
         content.innerHTML = createLeafletHTML(page.images, index);
-        
+
         pageEl.appendChild(content);
         container.appendChild(pageEl);
     });
 }
 
 function flipBook() {
-    const pages = document.getElementById('flipbook').querySelectorAll('.page');
-    pages.forEach((page, index) => {
-        if (index < state.currentPageIndex) {
-            page.classList.add('flipped');
-        } else {
-            page.classList.remove('flipped');
-        }
+    document.getElementById('flipbook').querySelectorAll('.page').forEach((page, index) => {
+        page.classList.toggle('flipped', index < state.currentPageIndex);
     });
-    updatePageNavigation();
+    updateNav();
 }
 
-function updatePageNavigation() {
-    elements.currentPage.textContent = state.currentPageIndex + 1;
+function updateNav() {
+    elements.pageInfo.textContent = t('flipbook.pageOf', {
+        current: state.currentPageIndex + 1,
+        total:   state.totalPages
+    });
     elements.prevPage.disabled = state.currentPageIndex === 0;
     elements.nextPage.disabled = state.currentPageIndex === state.totalPages - 1;
 }
 
-// Navigation Listeners
+function init() {
+    if (!imageIndices.length) {
+        elements.errorMsg.classList.remove('hidden');
+        return;
+    }
+
+    const pages = Array.from({ length: state.totalPages }, (_, i) => ({
+        id: i,
+        images: buildPageImages(i)
+    }));
+
+    buildFlipbook(pages);
+    elements.flipbookView.classList.remove('hidden');
+    updateNav();
+}
+
 elements.prevPage.addEventListener('click', () => {
     if (state.currentPageIndex > 0) { state.currentPageIndex--; flipBook(); }
 });
@@ -222,4 +192,4 @@ elements.nextPage.addEventListener('click', () => {
     if (state.currentPageIndex < state.totalPages - 1) { state.currentPageIndex++; flipBook(); }
 });
 
-elements.generateBtn.addEventListener('click', generateFlipbook);
+init();

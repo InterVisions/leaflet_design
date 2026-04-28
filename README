@@ -12,7 +12,6 @@ Users browse results, pick up to 9, and export them as a 5-page flipbook.
 From the repo root:
 
 ```bash
-cd image_pick
 python server.py --hf-repo nlphuji/flickr30k
 ```
 
@@ -58,7 +57,7 @@ python server.py --hf-repo nlphuji/flickr30k --host 0.0.0.0 --port 8080
 
 ## How it works
 
-1. **Startup** — loads the dataset, computes CLIP image embeddings, caches them to `image_pick/data/<dataset>.pt`
+1. **Startup** — loads the dataset, computes CLIP image embeddings, caches them to `data/<dataset>.pt`
    Subsequent runs load from cache instantly (cache is invalidated if the model or image count changes).
 
 2. **Search** — user types a prompt; server encodes it with the same CLIP text encoder, computes cosine similarity
@@ -69,7 +68,7 @@ python server.py --hf-repo nlphuji/flickr30k --host 0.0.0.0 --port 8080
 
 4. **Select** — click up to 9 images. Each gets a numbered badge (your personal rank order).
 
-5. **Flipbook** — hit Done; selections are saved to SQLite (`image_pick/data/rankings.db`) and the browser
+5. **Flipbook** — hit Done; selections are saved to SQLite (`data/rankings.db`) and the browser
    navigates to a 5-page animated flipbook at `/flipbook`.
 
 ---
@@ -78,18 +77,21 @@ python server.py --hf-repo nlphuji/flickr30k --host 0.0.0.0 --port 8080
 
 ```
 leaflet_design/
-├── image_pick/
-│   ├── server.py          # FastAPI server + routes
-│   ├── retrieval.py       # CLIP embedding + retrieval engine
-│   ├── data/
-│   │   ├── *.pt           # Cached embeddings (auto-generated)
-│   │   └── rankings.db    # SQLite: user sessions + selections
-│   └── static/
-│       ├── index.html     # Search & selection UI
-│       ├── flipbook.html  # Flipbook shell
-│       ├── flipbook.js    # Flipbook page-flip logic
-│       └── flipbook.css   # Flipbook styles + 3D animations
-└── requirements.txt
+├── server.py          # FastAPI server + routes
+├── retrieval.py       # CLIP embedding + retrieval engine
+├── requirements.txt
+├── data/
+│   ├── *.pt           # Cached embeddings (auto-generated)
+│   └── rankings.db    # SQLite: user sessions + selections
+└── static/
+    ├── index.html     # Search & selection UI
+    ├── flipbook.html  # Flipbook shell
+    ├── flipbook.js    # Flipbook page-flip logic
+    ├── flipbook.css   # Flipbook styles + 3D animations
+    ├── i18n.js        # Localisation system
+    └── locales/
+        ├── en.json
+        └── es.json
 ```
 
 ---
