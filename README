@@ -1,5 +1,5 @@
 
-# leaflet_design
+# Las Agencias
 
 Semantic image retrieval and flipbook presentation tool.
 Uses CLIP embeddings to rank images by similarity to a text prompt.
@@ -115,3 +115,19 @@ pip install -r requirements.txt
 ```
 
 Main deps: `fastapi`, `uvicorn`, `open_clip_torch`, `torch`, `Pillow`, `datasets`, `numpy`
+
+---
+
+## Usage
+
+### Step 1
+Write a prompt for retrieval, then high similarity images get retrieved and you can choose up to 9 for later display in the flipbook.
+![alt text](resources/part_1_screenshot.png)
+
+### Step 2
+After images are chosen, user can order them from 1 to 9, which corresponds to the order in which they are displayed in the flipbook.
+![alt text](resources/part_2_screenshot.png)
+
+### Step 3
+Flipbook is generated with the retrieved images in the order chosen.
+![alt text](resources/part_3_screenshot.png)
