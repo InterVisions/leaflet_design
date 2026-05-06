@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import argparse
+import csv
+import io
 import logging
 import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Response
@@ -20,8 +22,9 @@ log = logging.getLogger("server")
 
 app = FastAPI()
 ENGINE: RetrievalEngine | None = None
+ACTIVE_WORKSHOP_ID: int | None = None
 STATIC_DIR = Path(__file__).parent / "static"
-DB_PATH = Path(__file__).parent / "data" / "rankings.db"
+DB_PATH    = Path(__file__).parent / "data" / "rankings.db"
 
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
@@ -33,10 +36,19 @@ def init_db():
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(DB_PATH) as con:
         con.executescript("""
+            CREATE TABLE IF NOT EXISTS workshops (
+                id                INTEGER PRIMARY KEY AUTOINCREMENT,
+                name              TEXT NOT NULL,
+                community_context TEXT,
+                location          TEXT,
+                date              TEXT,
+                facilitator       TEXT,
+                created_at        TEXT
+            );
             CREATE TABLE IF NOT EXISTS sessions (
                 id         INTEGER PRIMARY KEY AUTOINCREMENT,
-                prompt     TEXT    NOT NULL,
-                created_at TEXT    DEFAULT (datetime('now'))
+                prompt     TEXT NOT NULL,
+                created_at TEXT DEFAULT (datetime('now'))
             );
             CREATE TABLE IF NOT EXISTS rankings (
                 id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,6 +58,12 @@ def init_db():
                 user_rank   INTEGER NOT NULL
             );
         """)
+        # Add workshop_id to sessions if this DB predates the workshops feature
+        try:
+            con.execute("ALTER TABLE sessions ADD COLUMN workshop_id INTEGER REFERENCES workshops(id)")
+        except sqlite3.OperationalError:
+            pass
+        con.commit()
 
 
 @contextmanager
@@ -66,9 +84,18 @@ class RankingItem(BaseModel):
     modelRank:  int
     userRank:   int
 
+
 class SubmitRequest(BaseModel):
     prompt:     str
     selections: List[RankingItem]
+
+
+class WorkshopCreate(BaseModel):
+    name:              str
+    community_context: str = ""
+    location:          str = ""
+    date:              str = ""
+    facilitator:       str = ""
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
@@ -81,6 +108,11 @@ async def index():
 @app.get("/flipbook")
 async def flipbook():
     return FileResponse(str(STATIC_DIR / "flipbook.html"))
+
+
+@app.get("/admin")
+async def admin():
+    return FileResponse(str(STATIC_DIR / "admin.html"))
 
 
 @app.get("/api/search")
@@ -108,7 +140,8 @@ async def submit(body: SubmitRequest):
 
     with get_db() as con:
         cur = con.execute(
-            "INSERT INTO sessions (prompt) VALUES (?)", (body.prompt.strip(),)
+            "INSERT INTO sessions (prompt, workshop_id) VALUES (?, ?)",
+            (body.prompt.strip(), ACTIVE_WORKSHOP_ID),
         )
         session_id = cur.lastrowid
         con.executemany(
@@ -116,25 +149,123 @@ async def submit(body: SubmitRequest):
             [(session_id, s.imageIndex, s.modelRank, s.userRank) for s in body.selections],
         )
 
-    log.info(f"Saved session {session_id}: prompt='{body.prompt}' selections={len(body.selections)}")
+    log.info(f"Saved session {session_id}: workshop={ACTIVE_WORKSHOP_ID} "
+             f"prompt='{body.prompt}' selections={len(body.selections)}")
     return {"session_id": session_id, "saved": len(body.selections)}
+
+
+@app.post("/api/workshop/create")
+async def create_workshop(body: WorkshopCreate):
+    with get_db() as con:
+        cur = con.execute(
+            """INSERT INTO workshops (name, community_context, location, date, facilitator, created_at)
+               VALUES (?, ?, ?, ?, ?, datetime('now'))""",
+            (body.name, body.community_context, body.location, body.date, body.facilitator),
+        )
+        workshop_id = cur.lastrowid
+    log.info(f"Created workshop {workshop_id}: {body.name} ({body.community_context})")
+    return {"workshop_id": workshop_id}
+
+
+@app.post("/api/workshop/set_active")
+async def set_active_workshop(workshop_id: int):
+    global ACTIVE_WORKSHOP_ID
+    with get_db() as con:
+        row = con.execute("SELECT id, name FROM workshops WHERE id=?", (workshop_id,)).fetchone()
+        if not row:
+            raise HTTPException(404, "workshop not found")
+    ACTIVE_WORKSHOP_ID = workshop_id
+    log.info(f"Active workshop → {workshop_id}: {row['name']}")
+    return {"active_workshop_id": ACTIVE_WORKSHOP_ID}
+
+
+@app.get("/api/workshop/active")
+async def get_active_workshop():
+    if ACTIVE_WORKSHOP_ID is None:
+        return {"active": False, "workshop_id": None, "name": None, "community_context": None}
+    with get_db() as con:
+        row = con.execute(
+            "SELECT id, name, community_context, location, date FROM workshops WHERE id=?",
+            (ACTIVE_WORKSHOP_ID,)
+        ).fetchone()
+    if not row:
+        return {"active": False, "workshop_id": None, "name": None, "community_context": None}
+    return {"active": True, **dict(row)}
+
+
+@app.post("/api/workshop/deactivate")
+async def deactivate_workshop():
+    global ACTIVE_WORKSHOP_ID
+    previous = ACTIVE_WORKSHOP_ID
+    ACTIVE_WORKSHOP_ID = None
+    log.info(f"Workshop {previous} deactivated — recording stopped")
+    return {"active": False, "previous_workshop_id": previous}
+
+
+@app.get("/api/workshops")
+async def list_workshops():
+    with get_db() as con:
+        rows = con.execute("""
+            SELECT w.id, w.name, w.community_context, w.location, w.date,
+                   COUNT(s.id) AS n_sessions
+            FROM workshops w
+            LEFT JOIN sessions s ON s.workshop_id = w.id
+            GROUP BY w.id
+            ORDER BY w.id DESC
+        """).fetchall()
+    return [dict(r) for r in rows]
+
+
+@app.get("/api/export_analysis")
+async def export_for_analysis():
+    with get_db() as con:
+        rows = con.execute("""
+            SELECT
+                r.session_id,
+                s.workshop_id,
+                w.name            AS workshop_name,
+                w.community_context,
+                s.prompt,
+                r.image_index,
+                r.model_rank,
+                r.user_rank
+            FROM rankings r
+            JOIN sessions  s ON r.session_id  = s.id
+            LEFT JOIN workshops w ON s.workshop_id = w.id
+            ORDER BY r.session_id, r.user_rank
+        """).fetchall()
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow([
+        "session_id", "workshop_id", "workshop_name", "community_context",
+        "prompt", "image_index", "model_rank", "user_rank",
+    ])
+    for row in rows:
+        writer.writerow(list(row))
+
+    return Response(
+        content=buf.getvalue(),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=rankings_export.csv"},
+    )
 
 
 # ── Startup / main ────────────────────────────────────────────────────────────
 
 def parse_args():
     p = argparse.ArgumentParser(description="Image retrieval server")
-    p.add_argument("--folder", default=None, help="Path to local image folder")
-    p.add_argument("--hf-repo", default=None, help="HuggingFace dataset repo (e.g. nlphuji/flickr30k)")
-    p.add_argument("--hf-split", default="train")
-    p.add_argument("--hf-config", default=None)
+    p.add_argument("--folder",       default=None)
+    p.add_argument("--hf-repo",      default=None)
+    p.add_argument("--hf-split",     default="train")
+    p.add_argument("--hf-config",    default=None)
     p.add_argument("--image-column", default="image")
-    p.add_argument("--max-images", type=int, default=2000)
-    p.add_argument("--model", default="ViT-B-32")
-    p.add_argument("--pretrained", default="openai")
-    p.add_argument("--device", default="auto")
-    p.add_argument("--port", type=int, default=8080)
-    p.add_argument("--host", default="127.0.0.1")
+    p.add_argument("--max-images",   type=int, default=2000)
+    p.add_argument("--model",        default="ViT-B-32")
+    p.add_argument("--pretrained",   default="openai")
+    p.add_argument("--device",       default="auto")
+    p.add_argument("--port",         type=int, default=8080)
+    p.add_argument("--host",         default="127.0.0.1")
     return p.parse_args()
 
 

@@ -1,0 +1,8 @@
+prompt,workshop_id,workshop_name,community_context,mean_tau,std_tau,n_sessions
+a family at the park,,,,0.5833,0.1944,4
+a family at the park,1,LGBT+,LGBT+,0.5741,0.0262,3
+a family at the park,2,test,test,0.5556,0.0,1
+perro ladrando,,,,0.3889,0.0,1
+some friends walking together in a park,,,,0.0556,0.0,1
+una familia en el parque,,,,0.4167,0.0278,2
+ñipeuvh,,,,0.5556,0.0,1

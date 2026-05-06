@@ -49,7 +49,7 @@ python server.py --folder /path/to/images
 # Cap at 500 images, different model
 python server.py --hf-repo nlphuji/flickr30k --max-images 500 --model ViT-L-14 --pretrained openai
 
-# Expose on local network
+# Expose on local network (so participants can connect from their own devices)
 python server.py --hf-repo nlphuji/flickr30k --host 0.0.0.0 --port 8080
 ```
 
@@ -57,7 +57,7 @@ python server.py --hf-repo nlphuji/flickr30k --host 0.0.0.0 --port 8080
 
 ## How it works
 
-1. **Startup** — loads the dataset, computes CLIP image embeddings, caches them to `data/<dataset>.pt`
+1. **Startup** — loads the dataset, computes CLIP image embeddings, caches them to `data/<dataset>.pt`.
    Subsequent runs load from cache instantly (cache is invalidated if the model or image count changes).
 
 2. **Search** — user types a prompt; server encodes it with the same CLIP text encoder, computes cosine similarity
@@ -73,22 +73,152 @@ python server.py --hf-repo nlphuji/flickr30k --host 0.0.0.0 --port 8080
 
 ---
 
+## Workshop guide
+
+This section documents how to run Las Agencias as a data collection instrument across multiple communities.
+The goal is to compare how different groups order AI-retrieved images for the same prompts, measuring agreement with the model using Kendall's τ.
+
+### Before the workshops
+
+**1. Preview the analysis output**
+
+Run the simulation to see what your post-workshop tables and report will look like before any real data is collected:
+
+```bash
+python simulate_workshop.py
+```
+
+This generates 4 synthetic communities × 20 sessions and opens `simulation_results.html` in your browser,
+showing the tau heatmap and summary table. Use it to sanity-check the setup and calibrate expectations.
+
+**2. Prepare the image dataset**
+
+Choose a dataset that is culturally neutral enough to allow comparison across communities.
+Flickr30k works well for general prompts. If you have a domain-specific image set, use `--folder`.
+
+**3. Prepare your prompts**
+
+Use the same prompts across all workshops — this is what makes the comparison valid.
+Write them down before the first session so they are consistent.
+
+---
+
+### On the day: facilitator setup
+
+The facilitator controls data collection through the **admin panel** at `/admin` — no terminal commands needed on the day.
+
+**Step 1 — Open the admin panel**
+
+Navigate to `https://your-domain.com/admin` (or `http://localhost:8080/admin` when running locally).
+
+**Step 2 — Start recording**
+
+Fill in the workshop details and click **Start recording**:
+
+- **Workshop name** — e.g. "LGBT+ Barcelona"
+- **Community context** — e.g. "LGBTQ+", "Roma", "Migrants", "Youth"
+- **Location** and **Date** — for your records
+- **Facilitator** — your name
+
+The banner turns green and shows a pulsing dot. All participant sessions from this point are automatically linked to this workshop.
+
+The admin panel also displays the **Participant URL** to share with the room.
+
+**Step 3 — Run the session**
+
+Participants go to the main URL and complete the task. The admin panel refreshes every 8 seconds — you can watch the session count rise in the Past workshops table.
+
+**Step 4 — Stop recording**
+
+When the workshop is done, click **Stop recording**. The database retains all data; no new sessions will be linked until you start the next workshop.
+
+**Between workshops** — repeat steps 2–4 for each community. All data stays in the same database and is separated by workshop ID automatically.
+
+---
+
+### During the workshop: participant flow
+
+Participants follow the same steps each time:
+
+1. **Enter a prompt** — the facilitator reads the prompt aloud; participants type it in exactly.
+2. **Browse and select** — pick up to 9 images that best fit the prompt.
+3. **Order them** — drag to rank from most to least relevant, then submit.
+
+The flipbook is a receipt for the participant. The ranking data is what matters for analysis.
+
+**Facilitator notes:**
+- Use identical prompts across all workshops. Wording differences will confuse the comparison.
+- Participants should not see each other's screens while selecting.
+- Each prompt is a separate session — participants submit and start fresh for the next prompt.
+- There is no login — each submission is a new anonymous session, linked to the active workshop.
+
+---
+
+### After all workshops: analysis
+
+**Step 1 — Export the raw data (optional)**
+
+```bash
+curl http://localhost:8080/api/export_analysis -o rankings_export.csv
+```
+
+This gives you a flat CSV with every image selection across all workshops and prompts.
+
+**Step 2 — Compute Kendall's τ**
+
+```bash
+python analysis/compute_tau_by_workshop.py
+```
+
+Reads `data/rankings.db`, computes tau per session, aggregates by (prompt, workshop),
+and writes `analysis/tau_by_prompt_and_workshop.csv`. Also prints a summary table to the terminal.
+
+**Step 3 — Generate the heatmap figure**
+
+```bash
+python analysis/generate_figure.py
+```
+
+Reads the CSV from step 2 and saves `analysis/tau_heatmap.png`.
+Requires matplotlib (`pip install --force-reinstall matplotlib`).
+
+**Reading the results:**
+
+| τ value | Meaning |
+|---------|---------|
+| `+1.0` | Community's ordering is identical to the AI's |
+| `+0.5` | Moderate agreement — community and AI mostly agree |
+| `0.0` | No correlation — community order is unrelated to AI ranking |
+| `−0.5` | Moderate disagreement |
+| `−1.0` | Complete reversal — community inverts the AI's ranking |
+
+A consistently low τ across a community (relative to others) indicates that the group
+systematically reorders images in ways the model did not anticipate.
+
+---
+
 ## Project structure
 
 ```
 leaflet_design/
-├── server.py          # FastAPI server + routes
-├── retrieval.py       # CLIP embedding + retrieval engine
+├── server.py                        # FastAPI server + routes
+├── retrieval.py                     # CLIP embedding + retrieval engine
+├── simulate_workshop.py             # Preview analysis with synthetic data
+├── test_pipeline.py                 # Integration tests
 ├── requirements.txt
+├── analysis/
+│   ├── compute_tau_by_workshop.py   # Main analysis: tau per prompt × workshop
+│   └── generate_figure.py          # Heatmap figure from analysis CSV
 ├── data/
-│   ├── *.pt           # Cached embeddings (auto-generated)
-│   └── rankings.db    # SQLite: user sessions + selections
+│   ├── *.pt                         # Cached embeddings (auto-generated)
+│   └── rankings.db                  # SQLite: workshops, sessions, rankings
 └── static/
-    ├── index.html     # Search & selection UI
-    ├── flipbook.html  # Flipbook shell
-    ├── flipbook.js    # Flipbook page-flip logic
-    ├── flipbook.css   # Flipbook styles + 3D animations
-    ├── i18n.js        # Localisation system
+    ├── index.html                   # Participant UI (search & select)
+    ├── admin.html                   # Facilitator control panel (/admin)
+    ├── flipbook.html                # Flipbook shell
+    ├── flipbook.js                  # Page-flip logic
+    ├── flipbook.css                 # Styles + 3D animations
+    ├── i18n.js                      # Localisation system
     └── locales/
         ├── en.json
         └── es.json
@@ -104,7 +234,14 @@ leaflet_design/
 | `GET` | `/flipbook?images=1,2,3&prompt=...` | Flipbook view |
 | `GET` | `/api/search?query=...` | Returns all ranked `{indices, similarities}` |
 | `GET` | `/api/image/{index}` | Returns image as JPEG (max 400×400) |
-| `POST` | `/api/submit` | Saves session + selections to DB |
+| `POST` | `/api/submit` | Saves session + selections, links to active workshop |
+| `GET` | `/admin` | Facilitator control panel |
+| `POST` | `/api/workshop/create` | Creates a workshop record, returns `workshop_id` |
+| `POST` | `/api/workshop/set_active?workshop_id=N` | Sets active workshop for new sessions |
+| `POST` | `/api/workshop/deactivate` | Stops recording (clears active workshop) |
+| `GET` | `/api/workshop/active` | Returns currently active workshop |
+| `GET` | `/api/workshops` | Lists all workshops with session counts |
+| `GET` | `/api/export_analysis` | Downloads full rankings CSV |
 
 ---
 
@@ -115,6 +252,8 @@ pip install -r requirements.txt
 ```
 
 Main deps: `fastapi`, `uvicorn`, `open_clip_torch`, `torch`, `Pillow`, `datasets`, `numpy`
+
+For analysis: `scipy` (optional, pure-Python fallback included), `matplotlib`
 
 ---
 

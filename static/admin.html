@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Las Agencias — Workshop Control</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 32px 20px 60px;
+  }
+
+  /* ── Layout ── */
+  .page { max-width: 680px; margin: 0 auto; }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 36px;
+  }
+  .header h1 { font-size: 18px; font-weight: 600; color: #f1f5f9; }
+  .header a  { font-size: 13px; color: #64748b; text-decoration: none; }
+  .header a:hover { color: #94a3b8; }
+
+  /* ── Status banner ── */
+  .status-banner {
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+  }
+  .status-banner.recording  { background: #052e16; border: 1px solid #166534; }
+  .status-banner.idle       { background: #1a1a2a; border: 1px solid #2d2d45; }
+
+  .status-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+  .recording  .status-dot { background: #22c55e; box-shadow: 0 0 0 4px rgba(34,197,94,.2); animation: pulse 2s infinite; }
+  .idle       .status-dot { background: #475569; }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(34,197,94,.2); }
+    50%       { box-shadow: 0 0 0 8px rgba(34,197,94,.05); }
+  }
+
+  .status-body { flex: 1; min-width: 0; }
+  .status-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .recording .status-label { color: #4ade80; }
+  .idle      .status-label { color: #64748b; }
+
+  .status-name { font-size: 20px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
+  .status-meta { font-size: 13px; color: #94a3b8; }
+
+  .participant-url {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,0,0,.3);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  .participant-url span { color: #64748b; flex-shrink: 0; }
+  .participant-url code { color: #a5f3fc; font-family: monospace; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .copy-btn {
+    background: none; border: 1px solid #334155; border-radius: 4px;
+    color: #94a3b8; font-size: 11px; padding: 3px 8px; cursor: pointer;
+    flex-shrink: 0;
+  }
+  .copy-btn:hover { background: #1e293b; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600;
+    border: none; cursor: pointer; transition: opacity .15s, transform .1s;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-stop  { background: #991b1b; color: #fff; margin-top: 16px; }
+  .btn-stop:hover:not(:disabled)  { background: #b91c1c; }
+  .btn-start { background: #0071e3; color: #fff; width: 100%; justify-content: center; font-size: 15px; padding: 12px; margin-top: 8px; }
+  .btn-start:hover:not(:disabled) { background: #0084ff; }
+
+  /* ── Card ── */
+  .card {
+    background: #1a1f2e;
+    border: 1px solid #2d3448;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  .card h2 { font-size: 14px; font-weight: 600; color: #94a3b8; margin-bottom: 20px; text-transform: uppercase; letter-spacing: .06em; }
+
+  /* ── Form ── */
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .05em; }
+  .field input {
+    width: 100%; padding: 10px 14px;
+    background: #0f1117; border: 1px solid #2d3448; border-radius: 8px;
+    color: #e2e8f0; font-size: 14px; outline: none;
+    transition: border-color .15s;
+  }
+  .field input:focus { border-color: #0071e3; }
+  .field input::placeholder { color: #475569; }
+  .required-star { color: #f87171; }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ── History table ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { border-bottom: 1px solid #2d3448; }
+  th { text-align: left; padding: 0 10px 10px; color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; font-weight: 600; }
+  td { padding: 10px; color: #cbd5e1; vertical-align: top; }
+  tbody tr { border-bottom: 1px solid #1e2535; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,.02); }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 99px;
+    font-size: 11px; font-weight: 600;
+  }
+  .badge-active { background: #052e16; color: #4ade80; border: 1px solid #166534; }
+  .n-sessions   { color: #94a3b8; font-size: 12px; }
+
+  .empty { color: #475569; font-size: 13px; text-align: center; padding: 24px 0; }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: #1e293b; border: 1px solid #334155; border-radius: 8px;
+    padding: 10px 18px; font-size: 13px; color: #e2e8f0;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <h1>Workshop Control</h1>
+    <a href="/">← Participant view</a>
+  </div>
+
+  <!-- Status banner -->
+  <div id="status-banner" class="status-banner idle">
+    <div class="status-dot"></div>
+    <div class="status-body">
+      <div class="status-label" id="status-label">Not recording</div>
+      <div class="status-name" id="status-name">No active workshop</div>
+      <div class="status-meta" id="status-meta">Start a workshop below to begin collecting data.</div>
+      <div class="participant-url" id="participant-url" style="display:none">
+        <span>Participant URL</span>
+        <code id="participant-url-text"></code>
+        <button class="copy-btn" onclick="copyUrl()">Copy</button>
+      </div>
+      <button class="btn btn-stop" id="stop-btn" style="display:none" onclick="stopRecording()">
+        ■ &nbsp;Stop recording
+      </button>
+    </div>
+  </div>
+
+  <!-- Start form -->
+  <div class="card" id="start-card">
+    <h2>Start new workshop</h2>
+    <div class="field">
+      <label>Workshop name <span class="required-star">*</span></label>
+      <input id="f-name" type="text" placeholder="e.g. LGBT+ Barcelona" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Community context <span class="required-star">*</span></label>
+      <input id="f-context" type="text" placeholder="e.g. LGBTQ+, Roma, Migrants, Youth">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Location</label>
+        <input id="f-location" type="text" placeholder="e.g. Barcelona">
+      </div>
+      <div class="field">
+        <label>Date</label>
+        <input id="f-date" type="date">
+      </div>
+    </div>
+    <div class="field">
+      <label>Facilitator</label>
+      <input id="f-facilitator" type="text" placeholder="Your name">
+    </div>
+    <button class="btn btn-start" id="start-btn" onclick="startRecording()">
+      ● &nbsp;Start recording
+    </button>
+  </div>
+
+  <!-- Workshop history -->
+  <div class="card">
+    <h2>Past workshops</h2>
+    <div id="history-wrap">
+      <div class="empty">Loading…</div>
+    </div>
+  </div>
+
+</div>
+<div id="toast"></div>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────────────
+  let activeWorkshopId = null;
+
+  // Pre-fill today's date
+  document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
+
+  // ── API helpers ────────────────────────────────────────────────────────────
+  async function api(method, path, body) {
+    const opts = { method, headers: {} };
+    if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+    const res = await fetch(path, opts);
+    if (!res.ok) { const t = await res.text(); throw new Error(t || res.statusText); }
+    return res.json();
+  }
+
+  // ── Render status banner ───────────────────────────────────────────────────
+  function renderStatus(data) {
+    const banner   = document.getElementById('status-banner');
+    const label    = document.getElementById('status-label');
+    const name     = document.getElementById('status-name');
+    const meta     = document.getElementById('status-meta');
+    const stopBtn  = document.getElementById('stop-btn');
+    const urlRow   = document.getElementById('participant-url');
+    const urlText  = document.getElementById('participant-url-text');
+    const startCard = document.getElementById('start-card');
+
+    if (data.active) {
+      activeWorkshopId = data.id;
+      banner.className  = 'status-banner recording';
+      label.textContent = 'Recording';
+      name.textContent  = data.name;
+      meta.textContent  = [data.community_context, data.location, data.date].filter(Boolean).join(' · ');
+      stopBtn.style.display = 'inline-flex';
+      urlRow.style.display  = 'flex';
+      urlText.textContent   = window.location.origin + '/';
+      startCard.style.opacity = '.4';
+      startCard.style.pointerEvents = 'none';
+    } else {
+      activeWorkshopId = null;
+      banner.className  = 'status-banner idle';
+      label.textContent = 'Not recording';
+      name.textContent  = 'No active workshop';
+      meta.textContent  = 'Start a workshop below to begin collecting data.';
+      stopBtn.style.display = 'none';
+      urlRow.style.display  = 'none';
+      startCard.style.opacity = '1';
+      startCard.style.pointerEvents = '';
+    }
+  }
+
+  // ── Render history table ───────────────────────────────────────────────────
+  function renderHistory(workshops) {
+    const wrap = document.getElementById('history-wrap');
+    if (!workshops.length) {
+      wrap.innerHTML = '<div class="empty">No workshops yet.</div>';
+      return;
+    }
+    const rows = workshops.map(w => {
+      const isActive = w.id === activeWorkshopId;
+      const badge    = isActive ? '<span class="badge badge-active">active</span>' : '';
+      return `<tr>
+        <td>${w.name} ${badge}</td>
+        <td>${w.community_context || '—'}</td>
+        <td>${w.location || '—'}</td>
+        <td class="n-sessions">${w.n_sessions}</td>
+      </tr>`;
+    }).join('');
+    wrap.innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Workshop</th><th>Community</th><th>Location</th><th>Sessions</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  // ── Refresh everything ─────────────────────────────────────────────────────
+  async function refresh() {
+    try {
+      const [status, workshops] = await Promise.all([
+        api('GET', '/api/workshop/active'),
+        api('GET', '/api/workshops'),
+      ]);
+      renderStatus(status);
+      renderHistory(workshops);
+    } catch (e) {
+      console.error('refresh failed:', e);
+    }
+  }
+
+  // ── Start recording ────────────────────────────────────────────────────────
+  async function startRecording() {
+    const name    = document.getElementById('f-name').value.trim();
+    const context = document.getElementById('f-context').value.trim();
+    if (!name || !context) { toast('Workshop name and community context are required.'); return; }
+
+    const btn = document.getElementById('start-btn');
+    btn.disabled = true;
+    btn.textContent = 'Starting…';
+
+    try {
+      const created = await api('POST', '/api/workshop/create', {
+        name,
+        community_context: context,
+        location:    document.getElementById('f-location').value.trim(),
+        date:        document.getElementById('f-date').value,
+        facilitator: document.getElementById('f-facilitator').value.trim(),
+      });
+      await api('POST', `/api/workshop/set_active?workshop_id=${created.workshop_id}`);
+
+      // Clear form
+      ['f-name','f-context','f-location','f-facilitator'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
+
+      toast('Recording started.');
+      await refresh();
+    } catch (e) {
+      toast('Error: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '● &nbsp;Start recording';
+    }
+  }
+
+  // ── Stop recording ─────────────────────────────────────────────────────────
+  async function stopRecording() {
+    const btn = document.getElementById('stop-btn');
+    btn.disabled = true;
+    btn.textContent = 'Stopping…';
+    try {
+      await api('POST', '/api/workshop/deactivate');
+      toast('Recording stopped.');
+      await refresh();
+    } catch (e) {
+      toast('Error: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '■ &nbsp;Stop recording';
+    }
+  }
+
+  // ── Copy participant URL ───────────────────────────────────────────────────
+  function copyUrl() {
+    navigator.clipboard.writeText(window.location.origin + '/').then(() => toast('URL copied.'));
+  }
+
+  // ── Toast ──────────────────────────────────────────────────────────────────
+  let _toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+  }
+
+  // ── Boot + polling ─────────────────────────────────────────────────────────
+  refresh();
+  setInterval(refresh, 8000);
+</script>
+</body>
+</html>
