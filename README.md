@@ -270,3 +270,10 @@ After images are chosen, user can order them from 1 to 9, which corresponds to t
 ### Step 3
 Flipbook is generated with the retrieved images in the order chosen.
 ![alt text](resources/part_3_screenshot.png)
+
+
+## Funding Acknowledgement
+
+![Co-funded by the European Union](eu-funded.png)
+
+Funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Education and Culture Executive Agency (EACEA). Neither the European Union nor EACEA can be held responsible for them.
