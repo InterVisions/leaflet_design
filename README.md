@@ -272,6 +272,43 @@ Flipbook is generated with the retrieved images in the order chosen.
 ![alt text](resources/part_3_screenshot.png)
 
 
+## Cloud deployment (systemd)
+
+A `leaflet.service` file is included for running the app as a persistent background service on a Linux cloud server.
+
+**1. Edit the service file**
+
+```bash
+vi leaflet.service
+```
+
+At minimum, update:
+- `User` / `Group` — your server's deploy user (default: `ubuntu`)
+- `WorkingDirectory` — absolute path where the project lives (e.g. `/opt/leaflet_design`)
+- `ExecStart` — choose `--hf-repo` or `--folder`, and adjust other flags as needed
+
+If your dataset requires a HuggingFace token, uncomment the `HF_TOKEN` line and set it.
+
+**2. Install and start**
+
+```bash
+sudo cp leaflet.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable leaflet
+sudo systemctl start leaflet
+```
+
+**3. Check status and logs**
+
+```bash
+sudo systemctl status leaflet
+sudo journalctl -u leaflet -f
+```
+
+The service binds to `0.0.0.0:8080` by default — suitable for a server behind a firewall or nginx reverse proxy.
+
+---
+
 ## Funding Acknowledgement
 
 ![Co-funded by the European Union](eu-funded.png)
