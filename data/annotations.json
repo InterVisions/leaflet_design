@@ -1,0 +1,957 @@
+{
+  "data\\situated-usecase-image-pool-v01\\images_v01\\ann67_1778793408_52e65e2e.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\ann102_1778793365_d0843b5a.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778494475_20351cbc.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778494974_77483d3e.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Child (0-12)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778495124_b6482548.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778495146_d26dded0.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778495166_92cfa6fc.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778495192_e4993a96.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\man9_1778795342_3c195b04.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Older adult (60+)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778495280_3463b369.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Older adult (60+)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778495419_7c1093b5.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778495433_cebb3c17.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 3
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778495451_6e3da6f6.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 3
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778495469_87da5d70.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 2
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778495519_ec934827.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 2
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778495539_6a70890c.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778495570_16dc4235.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778495598_d0acdb7d.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778495631_31a61359.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778495659_20df1410.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778495685_b6d9bfc0.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Child (0-12)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778590878_546f0c95.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778590992_41983598.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778591077_9d72437d.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778591243_ae2f4fce.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 3
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778591328_27c578d7.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778591633_1b4597c3.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659498_73abcb5a.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659522_d6a4076e.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659542_c5f3d12a.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 3
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659559_781ec47a.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659595_c0b73ff3.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659616_47a13ad7.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659635_1bae2bd1.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Young adult (18-30)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659660_5ae479d6.png": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Young adult (18-30)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659680_b79ca330.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Older adult (60+)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659695_d9efe436.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Older adult (60+)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659716_76681279.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 3
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659901_8802dcfe.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659917_93fab597.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Adolescent (13-17)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659935_1f9f047f.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Older adult (60+)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659952_ee67eb20.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 3
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659964_10680130.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659981_dbb9b06b.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 3
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659999_1567b818.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 3
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778660017_9e0811dc.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 2
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778660045_e3336408.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 2
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778660083_f61cbf3b.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778660161_eeaf8f66.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Older adult (60+)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778660173_3bf7590b.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 3
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778660187_fb97c695.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778660237_0de8af70.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778660789_cebe6758.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778660817_ad80fc90.jpg": {
+    "is_curated": 1,
+    "gender": "NB",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778660836_f948d56f.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778660857_dd1ecc6d.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 2
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778660869_1d7bcb2f.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 2
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778660885_b5928a31.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 2
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778660913_1bd9df9d.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778660934_8d952674.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778660949_f2147845.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778660961_2a93fe76.png": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778660976_a753f415.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 2
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778660993_1e160458.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661007_805325a6.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661026_93f08a13.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Young adult (18-30)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661042_0e6f9428.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661054_35ce444c.png": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661069_2b4e169a.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661086_c23f053e.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661099_6b1573fe.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\man9_1778795342_c763f1ff.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661125_bd18bd85.png": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661144_fe336c9a.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661203_10fda823.png": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Older adult (60+)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661240_bea5522c.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661253_c06282d3.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661268_bf08354d.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Child (0-12)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661291_a9d7351a.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 2
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661310_12219721.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661371_7d2b607f.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Older adult (60+)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661388_baf09fad.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Older adult (60+)",
+    "skin_tone": 3
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661439_c87936f1.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661464_de641651.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Child (0-12)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661484_d728c328.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661527_85ea65f5.jpg": {
+    "is_curated": 1,
+    "gender": "NB",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661544_c57df788.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661594_1e236204.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 3
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661618_71c38c78.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661649_84342012.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Child (0-12)",
+    "skin_tone": 2
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778666720_dda68935.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778666832_dfb499b0.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778666909_5920b18c.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 3
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778666987_ab104011.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778667064_08d8b2fd.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778667123_34bee930.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778667170_f9c506d2.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778667200_1547404e.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778667294_a83387f9.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778667379_07d88ef0.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778667445_528a28c4.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778667786_771e36d7.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778667863_7f6e5360.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778667975_faa71441.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Older adult (60+)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778668120_6f88080d.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778668185_eade0d18.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778668260_ccc2121c.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 2
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778668368_425ef6d4.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778668486_0dfd169b.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778668623_645ccfca.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Young adult (18-30)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778668734_d174c5be.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Young adult (18-30)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778668786_40ab361d.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778668912_8f83bcb9.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778669015_c01b3b3f.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778669084_ee27be9f.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Young adult (18-30)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778669237_6d294ca8.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Young adult (18-30)",
+    "skin_tone": 3
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778669325_e26da52b.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778669383_ee2fa2ab.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778669656_bb11332b.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778669710_f00ca6f9.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778669841_8765b6c8.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778669902_e5eeb1b1.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778669970_90ddb82d.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778670107_e485c0fa.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778670199_8a7ee5c8.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778670257_5e58190f.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778670337_165f8dcb.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 2
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778670465_2c293ea8.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 2
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task14_1778670554_92a85b48.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778670740_8350d086.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778670829_62f2e773.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778670888_f8e6c29e.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778670989_a996ad53.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778671111_e892fe11.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Young adult (18-30)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778671181_a9475c6e.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778671400_ccfaafdd.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Older adult (60+)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778671664_545ee06b.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778671740_c4ff1321.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778671842_63136747.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778671961_7f1c695a.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Adolescent (13-17)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778672145_d8a0d9f1.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Child (0-12)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778672281_23fd17a3.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778672354_404bc317.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task15_1778677795_e2f97c96.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Child (0-12)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778739729_ec9f34b2.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778739804_707ea004.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778739897_417c8e96.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Child (0-12)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778739995_9e8845e6.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Older adult (60+)",
+    "skin_tone": 3
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778742323_26e72a28.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778742447_c2471091.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778742489_bcee5857.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778742631_3ee770f2.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778742794_fd258d17.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778742861_54f55fbd.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Child (0-12)",
+    "skin_tone": 3
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778773216_57a333c3.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Young adult (18-30)",
+    "skin_tone": 2
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778773337_7ef7022f.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Young adult (18-30)",
+    "skin_tone": 6
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778773493_f1941d79.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 5
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778773522_196dbf2c.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 1
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778773670_3a8a263d.jpg": {
+    "is_curated": 1,
+    "gender": "M.Male",
+    "age": "Middle-aged (31-60)",
+    "skin_tone": 4
+  },
+  "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778773698_52524495.jpg": {
+    "is_curated": 1,
+    "gender": "M.Female",
+    "age": "Child (0-12)",
+    "skin_tone": 6
+  }
+}

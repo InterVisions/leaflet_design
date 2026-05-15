@@ -60,6 +60,55 @@ class RetrievalEngine:
                 log.warning(f"Skipping {p}: {e}")
         log.info(f"Loaded {len(self.dataset)} images")
 
+    def load_combined_pool(
+        self,
+        curated_folder: str,
+        distractor_folder: str | None = None,
+        max_curated: int = 2000,
+        max_distractors: int = 2000,
+    ):
+        """Load curated images + optional FHIBE distractors into one combined pool.
+
+        Curated images come first in self.dataset / self.image_paths so that
+        annotations keyed by the path returned from a relative folder call are stable.
+        The embedding cache is named 'situated_fhibe_combined' (or 'situated_curated_only'
+        when no distractor folder is given).
+        """
+        extensions = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
+
+        curated = Path(curated_folder)
+        curated_paths = sorted(
+            p for p in curated.rglob("*") if p.suffix.lower() in extensions
+        )[:max_curated]
+
+        distractor_paths: list[Path] = []
+        if distractor_folder:
+            dist = Path(distractor_folder)
+            distractor_paths = sorted(
+                p for p in dist.rglob("*") if p.suffix.lower() in extensions
+            )[:max_distractors]
+
+        if distractor_paths:
+            self._dataset_name = "situated_fhibe_combined"
+        else:
+            self._dataset_name = "situated_curated_only"
+
+        all_paths = curated_paths + distractor_paths
+        log.info(
+            f"Loading combined pool: {len(curated_paths)} curated + "
+            f"{len(distractor_paths)} distractors …"
+        )
+
+        self.dataset, self.image_paths = [], []
+        for p in all_paths:
+            try:
+                self.dataset.append(Image.open(p).convert("RGB"))
+                self.image_paths.append(str(p))
+            except Exception as e:
+                log.warning(f"Skipping {p}: {e}")
+
+        log.info(f"Loaded {len(self.dataset)} images total")
+
     def load_dataset_from_huggingface(self, repo: str, split: str = "train",
                                        image_column: str = "image",
                                        max_images: int = 2000,

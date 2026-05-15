@@ -332,6 +332,12 @@ async def export_for_analysis():
 
 def parse_args():
     p = argparse.ArgumentParser(description="Image retrieval server")
+    # Combined-pool mode (curated + FHIBE distractors)
+    p.add_argument("--curated-folder",    default=None, help="Curated image folder (is_curated=1)")
+    p.add_argument("--distractor-folder", default=None, help="FHIBE distractor folder (is_curated=0)")
+    p.add_argument("--max-curated",       type=int, default=2000)
+    p.add_argument("--max-distractors",   type=int, default=2000)
+    # Legacy single-folder / HuggingFace modes
     p.add_argument("--folder",       default=None)
     p.add_argument("--hf-repo",      default=None)
     p.add_argument("--hf-split",     default="train")
@@ -350,8 +356,10 @@ def main():
     global ENGINE, QUERY_METRICS
     args = parse_args()
 
-    if not args.folder and not args.hf_repo:
-        raise SystemExit("Provide --folder <path> or --hf-repo <repo>")
+    if not args.curated_folder and not args.folder and not args.hf_repo:
+        raise SystemExit(
+            "Provide one of: --curated-folder, --folder, or --hf-repo"
+        )
 
     init_db()
 
@@ -370,7 +378,14 @@ def main():
     ENGINE = RetrievalEngine(device=args.device)
     ENGINE.load_model(model_name=args.model, pretrained=args.pretrained)
 
-    if args.folder:
+    if args.curated_folder:
+        ENGINE.load_combined_pool(
+            curated_folder=args.curated_folder,
+            distractor_folder=args.distractor_folder,
+            max_curated=args.max_curated,
+            max_distractors=args.max_distractors,
+        )
+    elif args.folder:
         ENGINE.load_dataset_from_folder(args.folder, max_images=args.max_images)
     else:
         ENGINE.load_dataset_from_huggingface(

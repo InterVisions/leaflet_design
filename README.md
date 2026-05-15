@@ -9,11 +9,11 @@ Their choices are compared against the FAIR fairness metric to test whether it p
 
 ## How it works
 
-1. **Startup** — loads the image dataset, computes CLIP (ViT-B-16) embeddings, caches them to `data/<dataset>.pt`.
+1. **Startup** — loads the image pool (curated images + FHIBE distractors), computes CLIP (ViT-B-16) embeddings, caches them to `data/<pool>.pt`.
    Subsequent runs load from cache instantly (invalidated if model or image count changes).
 
 2. **Search** — participant types a prompt; the server encodes it with the CLIP text encoder, computes cosine similarity
-   against all image embeddings, and returns the full ranked list.
+   against all image embeddings, and returns the full ranked list (curated and distractors mixed).
 
 3. **Select** — participant clicks up to 9 images. Selection time is tracked silently in the background.
 
@@ -23,54 +23,90 @@ Their choices are compared against the FAIR fairness metric to test whether it p
 
 ---
 
+## Image pool
+
+The retrieval pool combines two sources:
+
+| Source | Folder | `is_curated` | Role in FAIR |
+|--------|--------|--------------|--------------|
+| Curated images | `data/situated-usecase-image-pool-v01/images_v01/` | `1` | Utility signal G[i]; demographic counts update `D_r^i` |
+| FHIBE distractors | `data/fhibe/` | `0` (implicit) | Occupy rank positions; never update `D_r^i` |
+
+**160 curated images** are annotated in `data/situated-usecase-image-pool-v01/intervisions_annotations_v01.csv` and
+converted to `data/annotations.json` by `scripts/prepare_annotations.py`.  
+**FHIBE distractors** have no annotations — the FAIR calculator treats any image missing from `annotations.json` as a distractor automatically.
+
+---
+
 ## Quick start
 
 ```bash
 pip install -r requirements.txt
 
-# HuggingFace dataset
-python server.py --hf-repo nlphuji/flickr30k
+# Step 1 — generate annotations JSON from the curated image CSV (one-time)
+python scripts/prepare_annotations.py
 
-# Local image folder
-python server.py --folder /path/to/images
+# Step 2 — pre-calculate FAIR metrics for all queries
+python scripts/precalculate_metrics.py \
+    --curated-folder  data/situated-usecase-image-pool-v01/images_v01 \
+    --distractor-folder data/fhibe \
+    --queries     data/queries.json \
+    --annotations data/annotations.json \
+    --output      data/metrics/query_metrics.json
+
+# Step 3 — start the server
+python server.py \
+    --curated-folder  data/situated-usecase-image-pool-v01/images_v01 \
+    --distractor-folder data/fhibe
 ```
 
 Then open http://127.0.0.1:8080
+
+> **Without FHIBE yet?** Omit `--distractor-folder` to run with curated images only. Add FHIBE later and re-run both steps 2 and 3.
 
 ---
 
 ## CLI options
 
+### `server.py`
+
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--hf-repo` | — | HuggingFace dataset repo (e.g. `nlphuji/flickr30k`) |
-| `--hf-split` | `train` | Dataset split (Flickr30k auto-switches to `test`) |
-| `--hf-config` | — | Dataset config name if required |
-| `--image-column` | `image` | Column name that holds images |
-| `--folder` | — | Local image folder instead of HuggingFace |
-| `--max-images` | `2000` | Max images to load |
+| `--curated-folder` | — | Curated image folder (`is_curated=1`) |
+| `--distractor-folder` | — | FHIBE distractor folder (`is_curated=0`); optional |
+| `--max-curated` | `2000` | Max curated images to load |
+| `--max-distractors` | `2000` | Max distractor images to load |
+| `--folder` | — | Legacy: single-folder mode (all images treated equally) |
+| `--hf-repo` | — | Legacy: HuggingFace dataset repo |
 | `--model` | `ViT-B-16` | OpenCLIP model architecture |
 | `--pretrained` | `openai` | Pretrained weights key |
 | `--device` | `auto` | `cuda`, `cpu`, or `auto` |
 | `--host` | `127.0.0.1` | Server host |
 | `--port` | `8080` | Server port |
 
-Use `--folder` OR `--hf-repo`, not both.
-
 ### Examples
 
 ```bash
-# Flickr30k from HuggingFace
-python server.py --hf-repo nlphuji/flickr30k
+# Standard run (curated + FHIBE distractors)
+python server.py \
+    --curated-folder  data/situated-usecase-image-pool-v01/images_v01 \
+    --distractor-folder data/fhibe
 
-# Local folder, cap at 500 images
-python server.py --folder /path/to/images --max-images 500
+# Limit FHIBE distractors to 500
+python server.py \
+    --curated-folder  data/situated-usecase-image-pool-v01/images_v01 \
+    --distractor-folder data/fhibe \
+    --max-distractors 500
 
-# Different model
-python server.py --hf-repo nlphuji/flickr30k --model ViT-L-14 --pretrained openai
+# Curated images only (no FHIBE yet)
+python server.py \
+    --curated-folder data/situated-usecase-image-pool-v01/images_v01
 
 # Expose on local network for participants on their own devices
-python server.py --hf-repo nlphuji/flickr30k --host 0.0.0.0 --port 8080
+python server.py \
+    --curated-folder  data/situated-usecase-image-pool-v01/images_v01 \
+    --distractor-folder data/fhibe \
+    --host 0.0.0.0 --port 8080
 ```
 
 ---
@@ -104,41 +140,54 @@ the FAIR metric predicts those community outcomes.
 
 ```
 Before workshops:
-  1. Annotate image pool with demographic attributes
-  2. Fill in data/desired_distribution.json with target demographic proportions
-  3. Pre-calculate FAIR metrics for all queries        ← scripts/precalculate_metrics.py
+  1. Generate annotations JSON from the curated image CSV  ← scripts/prepare_annotations.py
+  2. Download FHIBE distractors to data/fhibe/             ← see "Downloading FHIBE" below
+  3. Fill in data/desired_distribution.json                ← target demographic proportions
+  4. Pre-calculate FAIR metrics for all queries            ← scripts/precalculate_metrics.py
 
 On the day (per community):
-  4. Start recording in admin panel                   ← /admin
-  5. Run sessions with participants
-  6. Stop recording
+  5. Start recording in admin panel                        ← /admin
+  6. Run sessions with participants
+  7. Stop recording
 
 After all workshops:
-  7. Export raw data                                  ← /api/export_analysis
-  8. Correlate metrics with outcomes                  ← metrics/analyze_outcomes.py
+  8. Export raw data                                       ← /api/export_analysis
+  9. Correlate metrics with outcomes                       ← metrics/analyze_outcomes.py
 ```
 
 ---
 
 ### Before the workshops
 
-**1. Annotate the image pool**
+**1. Generate annotations.json**
 
-Create `data/annotations.json` mapping each image to its demographic attributes and curation status:
+The curated image annotations live in:
+
+```
+data/situated-usecase-image-pool-v01/intervisions_annotations_v01.csv
+```
+
+Columns: `image_path`, `term`, `perceived_gender` (0/1/2), `perceived_age` (text), `perceived_skin_tone` (1–6), `perceived_disability`.
+
+Convert to the JSON format expected by the FAIR calculator:
+
+```bash
+python scripts/prepare_annotations.py
+# Output: data/annotations.json  (160 entries, is_curated=1 for all)
+```
+
+The script maps gender values: `0 → "M.Male"`, `1 → "NB"`, `2 → "M.Female"`.  
+FHIBE distractors do **not** need entries — any image absent from `annotations.json` is treated as a distractor automatically.
+
+The resulting `annotations.json` looks like:
 
 ```json
 {
-  "path/to/image_001.jpg": {
-    "gender":     "M.Female",
-    "age":        "Middle-aged (31-60)",
-    "skin_tone":  4,
-    "is_curated": 1
-  },
-  "path/to/image_002.jpg": {
+  "data/situated-usecase-image-pool-v01/images_v01/task6_1778494475_20351cbc.jpg": {
+    "is_curated": 1,
     "gender":     "M.Male",
-    "age":        "Young adult (18-30)",
-    "skin_tone":  2,
-    "is_curated": 0
+    "age":        "Middle-aged (31-60)",
+    "skin_tone":  6
   }
 }
 ```
@@ -152,8 +201,6 @@ Create `data/annotations.json` mapping each image to its demographic attributes 
 | `gender` | `"M.Male"`, `"NB"`, `"M.Female"` | `"Cannot determine"` |
 | `age` | `"Child (0-12)"`, `"Adolescent (13-17)"`, `"Young adult (18-30)"`, `"Middle-aged (31-60)"`, `"Older adult (60+)"` | `"Cannot determine"` |
 | `skin_tone` | integers `1`–`6` (Fitzpatrick Scale) | `0`, `"?"`, or anything else |
-
-For HuggingFace datasets where images have no file paths, use string indices as keys (`"0"`, `"1"`, …).
 
 Age is grouped into three categories for analysis:
 
@@ -173,7 +220,32 @@ Fitzpatrick Scale is grouped into three categories:
 
 ---
 
-**2. Set the desired distribution**
+**2. Download FHIBE distractors**
+
+FHIBE lives on the CVC server. Download it with rsync (resumable):
+
+```bash
+rsync -avz --progress \
+  <username>@<cvc-hostname>:/data/datasets/FHIBE/fhibe.20250716.u.gT5_rFTA_downsampled_public/ \
+  data/fhibe/
+```
+
+Or with scp:
+
+```bash
+scp -r \
+  <username>@<cvc-hostname>:/data/datasets/FHIBE/fhibe.20250716.u.gT5_rFTA_downsampled_public/ \
+  data/fhibe/
+```
+
+The expected local path is `data/fhibe/`. The `--max-distractors` flag (default `2000`) controls how many are loaded.
+Start with 500–1000 distractors for a realistic pool without excessive memory use.
+
+Embeddings for FHIBE are computed and cached automatically on first run; no manual step needed.
+
+---
+
+**3. Set the desired distribution**
 
 Edit `data/desired_distribution.json` to reflect the target demographic proportions for your image pool.
 Leave values as `null` to fall back to uniform distribution (⅓ per category). Fill in after annotation:
@@ -188,43 +260,31 @@ Leave values as `null` to fall back to uniform distribution (⅓ per category). 
 
 ---
 
-**3. Prepare your queries**
+**4. Review your queries**
 
-Create `data/queries.json` — a list of the exact prompts participants will use:
+`data/queries.json` contains the exact prompts participants will use:
 
 ```json
 [
-  "families enjoying the park",
-  "people exercising outdoors",
-  "elderly people resting in the park",
-  "children playing in the park",
-  "community gathering in the park"
+  "A person pushing a person in a wheelchair",
+  "A person taking care of a child in a park"
 ]
 ```
 
-Use the same prompts across all workshops. Wording differences will break the cross-community comparison.
+Use the same prompts across all workshops. Wording differences break the cross-community comparison.
 
 ---
 
-**4. Pre-calculate FAIR metrics**
+**5. Pre-calculate FAIR metrics**
 
-Run once before the first workshop, after annotating the image pool:
-
-```bash
-python scripts/precalculate_metrics.py \
-    --queries     data/queries.json \
-    --annotations data/annotations.json \
-    --folder      data/image_pool \
-    --output      data/metrics/query_metrics.json
-```
-
-Or with a HuggingFace dataset:
+Run once before the first workshop, after completing steps 1–4:
 
 ```bash
 python scripts/precalculate_metrics.py \
+    --curated-folder  data/situated-usecase-image-pool-v01/images_v01 \
+    --distractor-folder data/fhibe \
     --queries     data/queries.json \
     --annotations data/annotations.json \
-    --hf-repo     nlphuji/flickr30k \
     --output      data/metrics/query_metrics.json
 ```
 
@@ -232,28 +292,33 @@ Options:
 
 | Flag | Default | Description |
 |------|---------|-------------|
+| `--curated-folder` | required* | Curated images folder |
+| `--distractor-folder` | — | FHIBE distractor folder (optional) |
 | `--queries` | required | Path to queries JSON |
 | `--annotations` | required | Path to annotations JSON |
-| `--folder` / `--hf-repo` | required | Image source (one of the two) |
 | `--output` | `data/metrics/query_metrics.json` | Where to write results |
 | `--k` | `20` | Ranking depth to evaluate |
 | `--model` | `ViT-B-16` | CLIP model (must match server) |
-| `--max-images` | `2000` | Image cap |
+| `--max-curated` | `2000` | Max curated images |
+| `--max-distractors` | `2000` | Max distractor images |
+
+\* Use `--folder` or `--hf-repo` for legacy single-pool mode.
 
 This saves one JSON entry per query:
 
 ```json
 {
-  "families enjoying the park": {
-    "model_ranking": ["path/img_045.jpg", "path/img_123.jpg", "..."],
-    "similarity_scores": [0.3412, 0.3287, "..."],
-    "FAIR_gender": 0.7341,
-    "FAIR_age": 0.6812,
-    "FAIR_skin_tone": 0.7109,
-    "valid_annotations_gender": 95,
-    "valid_annotations_age": 92,
-    "valid_annotations_skin_tone": 89,
-    "calculated_at": "2026-05-12T10:30:00+00:00"
+  "A person pushing a person in a wheelchair": {
+    "model_ranking": ["data/situated.../task6_....jpg", "..."],
+    "n_curated":  18,
+    "n_total":    20,
+    "FAIR_gender": 0.5876,
+    "FAIR_age":    0.6679,
+    "FAIR_skin_tone": 0.7805,
+    "valid_annotations_gender": 18,
+    "valid_annotations_age": 17,
+    "valid_annotations_skin_tone": 18,
+    "calculated_at": "2026-05-15T11:30:00+00:00"
   }
 }
 ```
@@ -263,13 +328,13 @@ This saves one JSON entry per query:
 `FAIR` (Fairness-Aware Information Retrieval) combines curation utility with demographic fairness:
 
 ```
-FAIR = (1/M) · Σᵢ₌₁ᵏ [is_curated[i] · (1/(KL(D*‖D_r^i) + 1)) / log₂(i+1)]
+FAIR = (1/M) · Σᵢ₌₁ᵏ [G[i] · (1/(KL(D_r^i‖D*) + 1)) / log₂(i+1)]
 ```
 
-- `is_curated[i]` = 1 if the rank-i image is campaign-appropriate, 0 if a distractor
+- `G[i]` = `is_curated[i]` = 1 if rank-i image is campaign-appropriate, 0 if a distractor
 - `D_r^i` = demographic distribution over **curated images only** in the top-i prefix (distractors don't update demographic counts)
 - `D*` = desired distribution from `data/desired_distribution.json`
-- `KL(D_r^i‖D*)` = `Σ_c D_r^i[c] · log(D_r^i[c] / D*[c])` — divergence from observed to desired (Gao et al. 2022); absent categories contribute 0 naturally
+- `KL(D_r^i‖D*)` = `Σ_c D_r^i[c] · log(D_r^i[c] / D*[c])` — divergence from observed to desired (Gao et al. 2022); absent categories contribute 0 naturally; KL = 0 when no curated images appear in prefix yet
 - `1/log₂(i+1)` = position discount (earlier ranks count more)
 - `M` = normalisation constant (sum of position discounts over all k positions)
 - Higher = better retrieval of curated images with balanced demographics
@@ -366,6 +431,12 @@ python -m pytest tests/test_fair_calculator.py -v
 
 Tests cover KL divergence, demographic distribution extraction, FAIR score calculation, and all edge cases (empty lists, "Cannot determine", invalid skin tone values, annotation gaps). No CLIP model is required.
 
+End-to-end smoke test (requires model and images):
+
+```bash
+python scripts/test_swap.py
+```
+
 ---
 
 ## Project structure
@@ -381,19 +452,25 @@ leaflet_design/
 │   └── analyze_outcomes.py          # Post-workshop: Spearman correlation analysis
 │
 ├── scripts/
-│   └── precalculate_metrics.py      # CLI — run before workshops to calculate FAIR/NDKL
+│   ├── prepare_annotations.py       # CSV → data/annotations.json (run once)
+│   ├── precalculate_metrics.py      # CLI — run before workshops to calculate FAIR
+│   └── test_swap.py                 # End-to-end smoke test
 │
 ├── tests/
 │   └── test_fair_calculator.py      # Unit tests (no CLIP required)
 │
 ├── data/
+│   ├── situated-usecase-image-pool-v01/
+│   │   ├── images_v01/              # 160 curated images (is_curated=1)
+│   │   └── intervisions_annotations_v01.csv  # Raw annotations from annotation tool
+│   ├── fhibe/                       # FHIBE distractor images (is_curated=0, download separately)
 │   ├── *.pt                         # Cached CLIP embeddings (auto-generated)
 │   ├── rankings.db                  # SQLite: workshops, sessions, rankings
-│   ├── annotations.json             # Image demographic annotations (you provide this)
-│   ├── queries.json                 # Workshop prompts (you provide this)
-│   ├── desired_distribution.json    # Target demographic proportions (you fill this in)
+│   ├── annotations.json             # Generated by prepare_annotations.py
+│   ├── queries.json                 # Workshop prompts (edit as needed)
+│   ├── desired_distribution.json    # Target demographic proportions (fill in before workshops)
 │   └── metrics/
-│       └── query_metrics.json       # Pre-calculated FAIR/NDKL (auto-generated)
+│       └── query_metrics.json       # Pre-calculated FAIR (auto-generated by precalculate_metrics.py)
 │
 ├── results/                         # Created by analyze_outcomes.py
 │   ├── metric_alignment_analysis.csv
@@ -461,7 +538,14 @@ vi leaflet.service
 Update at minimum:
 - `User` / `Group` — your deploy user (default: `ubuntu`)
 - `WorkingDirectory` — absolute project path (e.g. `/opt/leaflet_design`)
-- `ExecStart` — choose `--hf-repo` or `--folder` and adjust flags
+- `ExecStart` — update to use `--curated-folder` and `--distractor-folder`:
+
+```ini
+ExecStart=/opt/leaflet_design/.venv/bin/python server.py \
+    --curated-folder  data/situated-usecase-image-pool-v01/images_v01 \
+    --distractor-folder data/fhibe \
+    --host 0.0.0.0 --port 8080
+```
 
 If your dataset requires a HuggingFace token, uncomment the `HF_TOKEN` line.
 

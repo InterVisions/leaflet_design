@@ -68,10 +68,16 @@ def parse_args() -> argparse.Namespace:
         help="Path to annotations JSON file ({image_key: {gender, age, skin_tone}})",
     )
 
-    # Image dataset (exactly one of --folder / --hf-repo required)
+    # Image dataset — pick one mode
     src = p.add_mutually_exclusive_group(required=True)
-    src.add_argument("--folder",  help="Local folder of images")
-    src.add_argument("--hf-repo", help="HuggingFace dataset repo id")
+    src.add_argument("--curated-folder", help="Curated images folder (is_curated=1); combine with --distractor-folder for FHIBE")
+    src.add_argument("--folder",         help="Local folder of images (legacy single-pool mode)")
+    src.add_argument("--hf-repo",        help="HuggingFace dataset repo id")
+
+    # Combined-pool options (used with --curated-folder)
+    p.add_argument("--distractor-folder", default=None,  help="FHIBE distractor folder (is_curated=0)")
+    p.add_argument("--max-curated",       type=int, default=2000)
+    p.add_argument("--max-distractors",   type=int, default=2000)
 
     # HuggingFace options
     p.add_argument("--hf-split",     default="train",  help="Dataset split")
@@ -158,7 +164,14 @@ def main() -> None:
     engine = RetrievalEngine(device=args.device)
     engine.load_model(model_name=args.model, pretrained=args.pretrained)
 
-    if args.folder:
+    if args.curated_folder:
+        engine.load_combined_pool(
+            curated_folder=args.curated_folder,
+            distractor_folder=args.distractor_folder,
+            max_curated=args.max_curated,
+            max_distractors=args.max_distractors,
+        )
+    elif args.folder:
         engine.load_dataset_from_folder(args.folder, max_images=args.max_images)
     else:
         engine.load_dataset_from_huggingface(
@@ -204,7 +217,7 @@ def main() -> None:
     # ── Print summary ─────────────────────────────────────────────────────────
     print()
     print(f"{'Query':<45} {'FAIR_g':>7} {'FAIR_a':>7} {'FAIR_st':>7}")
-    print("─" * 68)
+    print("-" * 68)
     for query, m in results.items():
         label = (query[:42] + "…") if len(query) > 43 else query
         print(
