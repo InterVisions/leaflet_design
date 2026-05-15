@@ -604,9 +604,11 @@
       });
       if (!res.ok) throw new Error(await res.text());
 
+      const result  = await res.json();
       const indices = orderedItems.map(s => s.imageIndex).join(',');
       const lang    = i18n.getCurrentLocale();
-      window.location.href = `/flipbook?images=${indices}&prompt=${encodeURIComponent(prompt)}&lang=${lang}`;
+      const sid     = result.session_id ?? '';
+      window.location.href = `/flipbook?images=${indices}&prompt=${encodeURIComponent(prompt)}&lang=${lang}&session_id=${sid}`;
     } catch (err) {
       showToast(t('search.error', { msg: err.message }), true);
       confirmBtn.disabled = false;

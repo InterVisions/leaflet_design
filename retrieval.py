@@ -33,7 +33,7 @@ class RetrievalEngine:
         self._dataset_name: str = "dataset"
         self._model_key: str = ""
 
-    def load_model(self, model_name: str = "ViT-B-32", pretrained: str = "openai"):
+    def load_model(self, model_name: str = "ViT-B-16", pretrained: str = "openai"):
         import open_clip
         log.info(f"Loading CLIP model {model_name} ({pretrained}) on {self.device} …")
         t0 = time.time()

@@ -1,18 +1,38 @@
 
 # Las Agencias
 
-Semantic image retrieval and flipbook presentation tool.
-Uses CLIP embeddings to rank images by similarity to a text prompt.
-Users browse results, pick up to 9, and export them as a 5-page flipbook.
+Participatory AI audit tool for evaluating vision-language models (CLIP) in real community contexts.
+Participants use a semantic image retrieval interface to design a leaflet, selecting and ranking images returned by CLIP.
+Their choices are compared against the FAIR fairness metric to test whether it predicts human behaviour.
 
 ---
 
-## Run
+## How it works
 
-From the repo root:
+1. **Startup** — loads the image dataset, computes CLIP (ViT-B-16) embeddings, caches them to `data/<dataset>.pt`.
+   Subsequent runs load from cache instantly (invalidated if model or image count changes).
+
+2. **Search** — participant types a prompt; the server encodes it with the CLIP text encoder, computes cosine similarity
+   against all image embeddings, and returns the full ranked list.
+
+3. **Select** — participant clicks up to 9 images. Selection time is tracked silently in the background.
+
+4. **Order** — drag-to-rank the 9 selected images from most to least relevant, then submit.
+
+5. **Flipbook** — selections are saved to SQLite (`data/rankings.db`) and the browser renders a 5-page animated flipbook.
+
+---
+
+## Quick start
 
 ```bash
+pip install -r requirements.txt
+
+# HuggingFace dataset
 python server.py --hf-repo nlphuji/flickr30k
+
+# Local image folder
+python server.py --folder /path/to/images
 ```
 
 Then open http://127.0.0.1:8080
@@ -26,10 +46,10 @@ Then open http://127.0.0.1:8080
 | `--hf-repo` | — | HuggingFace dataset repo (e.g. `nlphuji/flickr30k`) |
 | `--hf-split` | `train` | Dataset split (Flickr30k auto-switches to `test`) |
 | `--hf-config` | — | Dataset config name if required |
-| `--image-column` | `image` | Column name that holds the images |
+| `--image-column` | `image` | Column name that holds images |
 | `--folder` | — | Local image folder instead of HuggingFace |
-| `--max-images` | `0` | Max images to load (0 = entire dataset) |
-| `--model` | `ViT-B-32` | OpenCLIP model name |
+| `--max-images` | `2000` | Max images to load |
+| `--model` | `ViT-B-16` | OpenCLIP model architecture |
 | `--pretrained` | `openai` | Pretrained weights key |
 | `--device` | `auto` | `cuda`, `cpu`, or `auto` |
 | `--host` | `127.0.0.1` | Server host |
@@ -40,66 +60,219 @@ Use `--folder` OR `--hf-repo`, not both.
 ### Examples
 
 ```bash
-# Flickr30k from HuggingFace (full dataset)
+# Flickr30k from HuggingFace
 python server.py --hf-repo nlphuji/flickr30k
 
-# Local folder
-python server.py --folder /path/to/images
+# Local folder, cap at 500 images
+python server.py --folder /path/to/images --max-images 500
 
-# Cap at 500 images, different model
-python server.py --hf-repo nlphuji/flickr30k --max-images 500 --model ViT-L-14 --pretrained openai
+# Different model
+python server.py --hf-repo nlphuji/flickr30k --model ViT-L-14 --pretrained openai
 
-# Expose on local network (so participants can connect from their own devices)
+# Expose on local network for participants on their own devices
 python server.py --hf-repo nlphuji/flickr30k --host 0.0.0.0 --port 8080
 ```
 
 ---
 
-## How it works
+## Participant flow
 
-1. **Startup** — loads the dataset, computes CLIP image embeddings, caches them to `data/<dataset>.pt`.
-   Subsequent runs load from cache instantly (cache is invalidated if the model or image count changes).
+### Step 1 — Search and select
+Write a prompt; CLIP retrieves and ranks matching images. Select up to 9.
 
-2. **Search** — user types a prompt; server encodes it with the same CLIP text encoder, computes cosine similarity
-   against all image embeddings, and returns every image sorted by score. Ranking happens once per query.
+![Search and select](resources/part_1_screenshot.png)
 
-3. **Browse** — results load progressively via infinite scroll (30 at a time from the pre-ranked local list).
-   No re-ranking, no extra API calls as you scroll.
+### Step 2 — Order
+Drag the selected images into your preferred order (1 = most relevant).
 
-4. **Select** — click up to 9 images. Each gets a numbered badge (your personal rank order).
+![Order](resources/part_2_screenshot.png)
 
-5. **Flipbook** — hit Done; selections are saved to SQLite (`data/rankings.db`) and the browser
-   navigates to a 5-page animated flipbook at `/flipbook`.
+### Step 3 — Flipbook
+A 5-page animated flipbook is generated with the images in the chosen order.
+
+![Flipbook](resources/part_3_screenshot.png)
 
 ---
 
 ## Workshop guide
 
 This section documents how to run Las Agencias as a data collection instrument across multiple communities.
-The goal is to compare how different groups order AI-retrieved images for the same prompts, measuring agreement with the model using Kendall's τ.
+The goal is to compare how different groups select and order AI-retrieved images, and to test whether
+the FAIR metric predicts those community outcomes.
+
+### Overview of the research workflow
+
+```
+Before workshops:
+  1. Annotate image pool with demographic attributes
+  2. Fill in data/desired_distribution.json with target demographic proportions
+  3. Pre-calculate FAIR metrics for all queries        ← scripts/precalculate_metrics.py
+
+On the day (per community):
+  4. Start recording in admin panel                   ← /admin
+  5. Run sessions with participants
+  6. Stop recording
+
+After all workshops:
+  7. Export raw data                                  ← /api/export_analysis
+  8. Correlate metrics with outcomes                  ← metrics/analyze_outcomes.py
+```
+
+---
 
 ### Before the workshops
 
-**1. Preview the analysis output**
+**1. Annotate the image pool**
 
-Run the simulation to see what your post-workshop tables and report will look like before any real data is collected:
+Create `data/annotations.json` mapping each image to its demographic attributes and curation status:
 
-```bash
-python simulate_workshop.py
+```json
+{
+  "path/to/image_001.jpg": {
+    "gender":     "M.Female",
+    "age":        "Middle-aged (31-60)",
+    "skin_tone":  4,
+    "is_curated": 1
+  },
+  "path/to/image_002.jpg": {
+    "gender":     "M.Male",
+    "age":        "Young adult (18-30)",
+    "skin_tone":  2,
+    "is_curated": 0
+  }
+}
 ```
 
-This generates 4 synthetic communities × 20 sessions and opens `simulation_results.html` in your browser,
-showing the tau heatmap and summary table. Use it to sanity-check the setup and calibrate expectations.
+**`is_curated`** — `1` if the image is campaign-appropriate (curated), `0` if it is a distractor. This is the utility signal `G[i]` in the FAIR formula. Images missing this field are treated as distractors.
 
-**2. Prepare the image dataset**
+**Valid demographic values:**
 
-Choose a dataset that is culturally neutral enough to allow comparison across communities.
-Flickr30k works well for general prompts. If you have a domain-specific image set, use `--folder`.
+| Axis | Valid values | Invalid (excluded from D_r^i) |
+|------|--------------|--------------------|
+| `gender` | `"M.Male"`, `"NB"`, `"M.Female"` | `"Cannot determine"` |
+| `age` | `"Child (0-12)"`, `"Adolescent (13-17)"`, `"Young adult (18-30)"`, `"Middle-aged (31-60)"`, `"Older adult (60+)"` | `"Cannot determine"` |
+| `skin_tone` | integers `1`–`6` (Fitzpatrick Scale) | `0`, `"?"`, or anything else |
 
-**3. Prepare your prompts**
+For HuggingFace datasets where images have no file paths, use string indices as keys (`"0"`, `"1"`, …).
 
-Use the same prompts across all workshops — this is what makes the comparison valid.
-Write them down before the first session so they are consistent.
+Age is grouped into three categories for analysis:
+
+| Raw value | Group |
+|-----------|-------|
+| Child / Adolescent / Young adult | `young` |
+| Middle-aged | `middle` |
+| Older adult | `older` |
+
+Fitzpatrick Scale is grouped into three categories:
+
+| FST | Group |
+|-----|-------|
+| 1–2 | `light` |
+| 3–4 | `medium` |
+| 5–6 | `dark` |
+
+---
+
+**2. Set the desired distribution**
+
+Edit `data/desired_distribution.json` to reflect the target demographic proportions for your image pool.
+Leave values as `null` to fall back to uniform distribution (⅓ per category). Fill in after annotation:
+
+```json
+{
+  "gender":    {"M.Male": 0.40, "NB": 0.10, "M.Female": 0.50},
+  "age":       {"young": 0.35, "middle": 0.45, "older": 0.20},
+  "skin_tone": {"light": 0.30, "medium": 0.40, "dark": 0.30}
+}
+```
+
+---
+
+**3. Prepare your queries**
+
+Create `data/queries.json` — a list of the exact prompts participants will use:
+
+```json
+[
+  "families enjoying the park",
+  "people exercising outdoors",
+  "elderly people resting in the park",
+  "children playing in the park",
+  "community gathering in the park"
+]
+```
+
+Use the same prompts across all workshops. Wording differences will break the cross-community comparison.
+
+---
+
+**4. Pre-calculate FAIR metrics**
+
+Run once before the first workshop, after annotating the image pool:
+
+```bash
+python scripts/precalculate_metrics.py \
+    --queries     data/queries.json \
+    --annotations data/annotations.json \
+    --folder      data/image_pool \
+    --output      data/metrics/query_metrics.json
+```
+
+Or with a HuggingFace dataset:
+
+```bash
+python scripts/precalculate_metrics.py \
+    --queries     data/queries.json \
+    --annotations data/annotations.json \
+    --hf-repo     nlphuji/flickr30k \
+    --output      data/metrics/query_metrics.json
+```
+
+Options:
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--queries` | required | Path to queries JSON |
+| `--annotations` | required | Path to annotations JSON |
+| `--folder` / `--hf-repo` | required | Image source (one of the two) |
+| `--output` | `data/metrics/query_metrics.json` | Where to write results |
+| `--k` | `20` | Ranking depth to evaluate |
+| `--model` | `ViT-B-16` | CLIP model (must match server) |
+| `--max-images` | `2000` | Image cap |
+
+This saves one JSON entry per query:
+
+```json
+{
+  "families enjoying the park": {
+    "model_ranking": ["path/img_045.jpg", "path/img_123.jpg", "..."],
+    "similarity_scores": [0.3412, 0.3287, "..."],
+    "FAIR_gender": 0.7341,
+    "FAIR_age": 0.6812,
+    "FAIR_skin_tone": 0.7109,
+    "valid_annotations_gender": 95,
+    "valid_annotations_age": 92,
+    "valid_annotations_skin_tone": 89,
+    "calculated_at": "2026-05-12T10:30:00+00:00"
+  }
+}
+```
+
+**Metric definition:**
+
+`FAIR` (Fairness-Aware Information Retrieval) combines curation utility with demographic fairness:
+
+```
+FAIR = (1/M) · Σᵢ₌₁ᵏ [is_curated[i] · (1/(KL(D*‖D_r^i) + 1)) / log₂(i+1)]
+```
+
+- `is_curated[i]` = 1 if the rank-i image is campaign-appropriate, 0 if a distractor
+- `D_r^i` = demographic distribution over **curated images only** in the top-i prefix (distractors don't update demographic counts)
+- `D*` = desired distribution from `data/desired_distribution.json`
+- `KL(D_r^i‖D*)` = `Σ_c D_r^i[c] · log(D_r^i[c] / D*[c])` — divergence from observed to desired (Gao et al. 2022); absent categories contribute 0 naturally
+- `1/log₂(i+1)` = position discount (earlier ranks count more)
+- `M` = normalisation constant (sum of position discounts over all k positions)
+- Higher = better retrieval of curated images with balanced demographics
 
 ---
 
@@ -109,7 +282,7 @@ The facilitator controls data collection through the **admin panel** at `/admin`
 
 **Step 1 — Open the admin panel**
 
-Navigate to `https://your-domain.com/admin` (or `http://localhost:8080/admin` when running locally).
+Navigate to `http://localhost:8080/admin` (or your deployed URL + `/admin`).
 
 **Step 2 — Start recording**
 
@@ -120,37 +293,33 @@ Fill in the workshop details and click **Start recording**:
 - **Location** and **Date** — for your records
 - **Facilitator** — your name
 
-The banner turns green and shows a pulsing dot. All participant sessions from this point are automatically linked to this workshop.
+The banner turns green and shows a pulsing dot. All participant sessions from this point are linked to this workshop.
 
-The admin panel also displays the **Participant URL** to share with the room.
+**Step 3 — Share the participant URL**
 
-**Step 3 — Run the session**
-
-Participants go to the main URL and complete the task. The admin panel refreshes every 8 seconds — you can watch the session count rise in the Past workshops table.
+The admin panel shows the URL to share with the room. Participants open it on their own devices.
 
 **Step 4 — Stop recording**
 
-When the workshop is done, click **Stop recording**. The database retains all data; no new sessions will be linked until you start the next workshop.
+When the workshop is done, click **Stop recording**. All data is retained; no new sessions will be linked until the next workshop is started.
 
-**Between workshops** — repeat steps 2–4 for each community. All data stays in the same database and is separated by workshop ID automatically.
+**Between workshops** — repeat steps 2–4 for each community. All data stays in the same database, separated by workshop ID.
 
 ---
 
 ### During the workshop: participant flow
 
-Participants follow the same steps each time:
-
 1. **Enter a prompt** — the facilitator reads the prompt aloud; participants type it in exactly.
-2. **Browse and select** — pick up to 9 images that best fit the prompt.
+2. **Browse and select** — pick up to 9 images that best fit the prompt. (Selection time is recorded automatically.)
 3. **Order them** — drag to rank from most to least relevant, then submit.
 
-The flipbook is a receipt for the participant. The ranking data is what matters for analysis.
+The flipbook is a receipt for the participant. The ranking and timing data is what matters for analysis.
 
 **Facilitator notes:**
-- Use identical prompts across all workshops. Wording differences will confuse the comparison.
+- Use identical prompts across all workshops.
 - Participants should not see each other's screens while selecting.
 - Each prompt is a separate session — participants submit and start fresh for the next prompt.
-- There is no login — each submission is a new anonymous session, linked to the active workshop.
+- There is no login — each submission is a new anonymous session linked to the active workshop.
 
 ---
 
@@ -162,38 +331,40 @@ The flipbook is a receipt for the participant. The ranking data is what matters 
 curl http://localhost:8080/api/export_analysis -o rankings_export.csv
 ```
 
-This gives you a flat CSV with every image selection across all workshops and prompts.
+Columns: `session_id`, `workshop_id`, `workshop_name`, `community_context`, `prompt`, `selection_time_seconds`, `image_index`, `model_rank`, `user_rank`.
 
-**Step 2 — Compute Kendall's τ**
-
-```bash
-python analysis/compute_tau_by_workshop.py
-```
-
-Reads `data/rankings.db`, computes tau per session, aggregates by (prompt, workshop),
-and writes `analysis/tau_by_prompt_and_workshop.csv`. Also prints a summary table to the terminal.
-
-**Step 3 — Generate the heatmap figure**
+**Step 2 — Correlate FAIR/NDKL with community outcomes**
 
 ```bash
-python analysis/generate_figure.py
+python metrics/analyze_outcomes.py
 ```
 
-Reads the CSV from step 2 and saves `analysis/tau_heatmap.png`.
-Requires matplotlib (`pip install --force-reinstall matplotlib`).
+Or with explicit paths:
 
-**Reading the results:**
+```bash
+python metrics/analyze_outcomes.py \
+    --metrics data/metrics/query_metrics.json \
+    --db      data/rankings.db \
+    --output  results/metric_alignment_analysis.csv \
+    --plots   results/correlation_plots
+```
 
-| τ value | Meaning |
-|---------|---------|
-| `+1.0` | Community's ordering is identical to the AI's |
-| `+0.5` | Moderate agreement — community and AI mostly agree |
-| `0.0` | No correlation — community order is unrelated to AI ranking |
-| `−0.5` | Moderate disagreement |
-| `−1.0` | Complete reversal — community inverts the AI's ranking |
+This reads the pre-calculated metrics and the workshop database, then computes Spearman correlations between each FAIR metric (gender/age/skin tone) and mean selection time — both pooled across all communities and separately per community.
 
-A consistently low τ across a community (relative to others) indicates that the group
-systematically reorders images in ways the model did not anticipate.
+Output: `results/metric_alignment_analysis.csv` with columns `group`, `metric`, `outcome`, `r`, `p_value`, `n_queries`.
+
+Scatter plots are written to `results/correlation_plots/` if `--plots` is given (requires matplotlib).
+
+---
+
+## Tests
+
+```bash
+pip install pytest
+python -m pytest tests/test_fair_calculator.py -v
+```
+
+Tests cover KL divergence, demographic distribution extraction, FAIR score calculation, and all edge cases (empty lists, "Cannot determine", invalid skin tone values, annotation gaps). No CLIP model is required.
 
 ---
 
@@ -201,24 +372,40 @@ systematically reorders images in ways the model did not anticipate.
 
 ```
 leaflet_design/
-├── server.py                        # FastAPI server + routes
-├── retrieval.py                     # CLIP embedding + retrieval engine
-├── simulate_workshop.py             # Preview analysis with synthetic data
-├── test_pipeline.py                 # Integration tests
+├── server.py                        # FastAPI server + routes + SQLite schema
+├── retrieval.py                     # CLIP embedding + retrieval engine (ViT-B-16)
 ├── requirements.txt
-├── analysis/
-│   ├── compute_tau_by_workshop.py   # Main analysis: tau per prompt × workshop
-│   └── generate_figure.py          # Heatmap figure from analysis CSV
+│
+├── metrics/
+│   ├── fair_calculator.py           # FAIR calculation (FAIRCalculator class)
+│   └── analyze_outcomes.py          # Post-workshop: Spearman correlation analysis
+│
+├── scripts/
+│   └── precalculate_metrics.py      # CLI — run before workshops to calculate FAIR/NDKL
+│
+├── tests/
+│   └── test_fair_calculator.py      # Unit tests (no CLIP required)
+│
 ├── data/
-│   ├── *.pt                         # Cached embeddings (auto-generated)
-│   └── rankings.db                  # SQLite: workshops, sessions, rankings
+│   ├── *.pt                         # Cached CLIP embeddings (auto-generated)
+│   ├── rankings.db                  # SQLite: workshops, sessions, rankings
+│   ├── annotations.json             # Image demographic annotations (you provide this)
+│   ├── queries.json                 # Workshop prompts (you provide this)
+│   ├── desired_distribution.json    # Target demographic proportions (you fill this in)
+│   └── metrics/
+│       └── query_metrics.json       # Pre-calculated FAIR/NDKL (auto-generated)
+│
+├── results/                         # Created by analyze_outcomes.py
+│   ├── metric_alignment_analysis.csv
+│   └── correlation_plots/
+│
 └── static/
-    ├── index.html                   # Participant UI (search & select)
+    ├── index.html                   # Participant UI (search, select, order)
     ├── admin.html                   # Facilitator control panel (/admin)
-    ├── flipbook.html                # Flipbook shell
-    ├── flipbook.js                  # Page-flip logic
+    ├── flipbook.html                # Flipbook shell + per-session metrics panel
+    ├── flipbook.js                  # Page-flip layout logic
     ├── flipbook.css                 # Styles + 3D animations
-    ├── i18n.js                      # Localisation system
+    ├── i18n.js                      # Localisation (EN / ES)
     └── locales/
         ├── en.json
         └── es.json
@@ -230,18 +417,19 @@ leaflet_design/
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/` | Search UI |
+| `GET` | `/` | Participant search UI |
 | `GET` | `/flipbook?images=1,2,3&prompt=...` | Flipbook view |
+| `GET` | `/admin` | Facilitator control panel |
 | `GET` | `/api/search?query=...` | Returns all ranked `{indices, similarities}` |
 | `GET` | `/api/image/{index}` | Returns image as JPEG (max 400×400) |
-| `POST` | `/api/submit` | Saves session + selections, links to active workshop |
-| `GET` | `/admin` | Facilitator control panel |
+| `POST` | `/api/submit` | Saves session + selections + `selection_time_seconds`, computes FAIR/Spearman, links to active workshop |
+| `GET` | `/api/session/{id}/metrics` | Returns pre-computed FAIR, NDKL, and Spearman metrics for a session |
 | `POST` | `/api/workshop/create` | Creates a workshop record, returns `workshop_id` |
 | `POST` | `/api/workshop/set_active?workshop_id=N` | Sets active workshop for new sessions |
-| `POST` | `/api/workshop/deactivate` | Stops recording (clears active workshop) |
+| `POST` | `/api/workshop/deactivate` | Stops recording |
 | `GET` | `/api/workshop/active` | Returns currently active workshop |
 | `GET` | `/api/workshops` | Lists all workshops with session counts |
-| `GET` | `/api/export_analysis` | Downloads full rankings CSV |
+| `GET` | `/api/export_analysis` | Downloads full rankings CSV (includes `selection_time_seconds`) |
 
 ---
 
@@ -251,30 +439,18 @@ leaflet_design/
 pip install -r requirements.txt
 ```
 
-Main deps: `fastapi`, `uvicorn`, `open_clip_torch`, `torch`, `Pillow`, `datasets`, `numpy`
+Core: `fastapi`, `uvicorn`, `open_clip_torch`, `torch`, `Pillow`, `datasets`, `numpy`, `pandas`
 
-For analysis: `scipy` (optional, pure-Python fallback included), `matplotlib`
+Analysis extras (not in requirements.txt — install separately if needed):
+- `scipy` — exact p-values for Spearman correlations (numpy fallback included)
+- `matplotlib` — scatter plots
+- `pytest` — running the test suite
 
 ---
 
-## Usage
-
-### Step 1
-Write a prompt for retrieval, then high similarity images get retrieved and you can choose up to 9 for later display in the flipbook.
-![alt text](resources/part_1_screenshot.png)
-
-### Step 2
-After images are chosen, user can order them from 1 to 9, which corresponds to the order in which they are displayed in the flipbook.
-![alt text](resources/part_2_screenshot.png)
-
-### Step 3
-Flipbook is generated with the retrieved images in the order chosen.
-![alt text](resources/part_3_screenshot.png)
-
-
 ## Cloud deployment (systemd)
 
-A `leaflet.service` file is included for running the app as a persistent background service on a Linux cloud server.
+A `leaflet.service` file is included for running the app as a persistent background service on a Linux server.
 
 **1. Edit the service file**
 
@@ -282,12 +458,12 @@ A `leaflet.service` file is included for running the app as a persistent backgro
 vi leaflet.service
 ```
 
-At minimum, update:
-- `User` / `Group` — your server's deploy user (default: `ubuntu`)
-- `WorkingDirectory` — absolute path where the project lives (e.g. `/opt/leaflet_design`)
-- `ExecStart` — choose `--hf-repo` or `--folder`, and adjust other flags as needed
+Update at minimum:
+- `User` / `Group` — your deploy user (default: `ubuntu`)
+- `WorkingDirectory` — absolute project path (e.g. `/opt/leaflet_design`)
+- `ExecStart` — choose `--hf-repo` or `--folder` and adjust flags
 
-If your dataset requires a HuggingFace token, uncomment the `HF_TOKEN` line and set it.
+If your dataset requires a HuggingFace token, uncomment the `HF_TOKEN` line.
 
 **2. Install and start**
 
@@ -305,7 +481,7 @@ sudo systemctl status leaflet
 sudo journalctl -u leaflet -f
 ```
 
-The service binds to `0.0.0.0:8080` by default — suitable for a server behind a firewall or nginx reverse proxy.
+The service binds to `0.0.0.0:8080` by default — suitable behind a firewall or nginx reverse proxy.
 
 ---
 

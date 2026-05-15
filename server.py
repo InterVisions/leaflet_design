@@ -3,7 +3,9 @@ from __future__ import annotations
 import argparse
 import csv
 import io
+import json
 import logging
+import math
 import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
@@ -16,15 +18,21 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from retrieval import RetrievalEngine
+from metrics.fair_calculator import (
+    AXES,
+    spearman_r,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("server")
 
 app = FastAPI()
-ENGINE: RetrievalEngine | None = None
+ENGINE:             RetrievalEngine | None = None
 ACTIVE_WORKSHOP_ID: int | None = None
+QUERY_METRICS:      dict = {}   # loaded from data/metrics/query_metrics.json (pre-calculated FAIR)
 STATIC_DIR = Path(__file__).parent / "static"
 DB_PATH    = Path(__file__).parent / "data" / "rankings.db"
+DATA_DIR   = Path(__file__).parent / "data"
 
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
@@ -46,9 +54,11 @@ def init_db():
                 created_at        TEXT
             );
             CREATE TABLE IF NOT EXISTS sessions (
-                id         INTEGER PRIMARY KEY AUTOINCREMENT,
-                prompt     TEXT NOT NULL,
-                created_at TEXT DEFAULT (datetime('now'))
+                id                     INTEGER PRIMARY KEY AUTOINCREMENT,
+                prompt                 TEXT NOT NULL,
+                created_at             TEXT DEFAULT (datetime('now')),
+                selection_time_seconds REAL,
+                metrics_json           TEXT
             );
             CREATE TABLE IF NOT EXISTS rankings (
                 id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,11 +68,16 @@ def init_db():
                 user_rank   INTEGER NOT NULL
             );
         """)
-        # Add workshop_id to sessions if this DB predates the workshops feature
-        try:
-            con.execute("ALTER TABLE sessions ADD COLUMN workshop_id INTEGER REFERENCES workshops(id)")
-        except sqlite3.OperationalError:
-            pass
+        # Migrations for columns added after initial schema
+        for migration in [
+            "ALTER TABLE sessions ADD COLUMN workshop_id INTEGER REFERENCES workshops(id)",
+            "ALTER TABLE sessions ADD COLUMN selection_time_seconds REAL",
+            "ALTER TABLE sessions ADD COLUMN metrics_json TEXT",
+        ]:
+            try:
+                con.execute(migration)
+            except sqlite3.OperationalError:
+                pass
         con.commit()
 
 
@@ -96,6 +111,51 @@ class WorkshopCreate(BaseModel):
     location:          str = ""
     date:              str = ""
     facilitator:       str = ""
+
+
+# ── Session metric computation ────────────────────────────────────────────────
+
+def compute_session_metrics(body: "SubmitRequest") -> dict | None:
+    """
+    Build the metrics blob stored with each session:
+      - FAIR (gender/age/skin_tone): looked up from pre-calculated query_metrics.json
+      - Spearman r/p: computed from model rank vs user rank over the 9 selected images
+
+    Never raises — metric failures must not block saving.
+    Returns None only when ENGINE is unavailable.
+    """
+    if ENGINE is None:
+        return None
+
+    try:
+        prompt = body.prompt.strip()
+        selected = sorted(body.selections, key=lambda s: s.modelRank)
+        model_ranks = [s.modelRank for s in selected]
+        user_ranks  = [s.userRank  for s in selected]
+
+        metrics: dict = {}
+
+        # ── Pre-calculated FAIR (full top-20 retrieval, not just 9 images) ──
+        qm = QUERY_METRICS.get(prompt)
+        if qm:
+            for axis in AXES:
+                key = f"FAIR_{axis}"
+                if key in qm:
+                    metrics[key] = qm[key]
+        else:
+            log.debug("No pre-calculated metrics for query: %r — run precalculate_metrics.py", prompt)
+
+        # ── Spearman (model rank vs participant rank over 9 selected images) ──
+        if len(model_ranks) >= 3:
+            r, p = spearman_r(model_ranks, user_ranks)
+            metrics["spearman_r"] = round(r, 4)
+            metrics["spearman_p"] = None if math.isnan(p) else round(p, 4)
+
+        return metrics or None
+
+    except Exception as exc:
+        log.warning("Metric computation failed (session still saved): %s", exc)
+        return None
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
@@ -138,10 +198,13 @@ async def submit(body: SubmitRequest):
     if len(body.selections) > 9:
         raise HTTPException(400, "maximum 9 selections")
 
+    metrics = compute_session_metrics(body)
+
     with get_db() as con:
         cur = con.execute(
-            "INSERT INTO sessions (prompt, workshop_id) VALUES (?, ?)",
-            (body.prompt.strip(), ACTIVE_WORKSHOP_ID),
+            "INSERT INTO sessions (prompt, workshop_id, metrics_json) VALUES (?, ?, ?)",
+            (body.prompt.strip(), ACTIVE_WORKSHOP_ID,
+             json.dumps(metrics) if metrics else None),
         )
         session_id = cur.lastrowid
         con.executemany(
@@ -151,7 +214,20 @@ async def submit(body: SubmitRequest):
 
     log.info(f"Saved session {session_id}: workshop={ACTIVE_WORKSHOP_ID} "
              f"prompt='{body.prompt}' selections={len(body.selections)}")
-    return {"session_id": session_id, "saved": len(body.selections)}
+    return {"session_id": session_id, "saved": len(body.selections), "metrics": metrics}
+
+
+@app.get("/api/session/{session_id}/metrics")
+async def get_session_metrics(session_id: int):
+    with get_db() as con:
+        row = con.execute(
+            "SELECT metrics_json FROM sessions WHERE id = ?", (session_id,)
+        ).fetchone()
+    if row is None:
+        raise HTTPException(404, "session not found")
+    if not row["metrics_json"]:
+        return {}
+    return json.loads(row["metrics_json"])
 
 
 @app.post("/api/workshop/create")
@@ -223,9 +299,10 @@ async def export_for_analysis():
             SELECT
                 r.session_id,
                 s.workshop_id,
-                w.name            AS workshop_name,
+                w.name                   AS workshop_name,
                 w.community_context,
                 s.prompt,
+                s.selection_time_seconds,
                 r.image_index,
                 r.model_rank,
                 r.user_rank
@@ -239,7 +316,7 @@ async def export_for_analysis():
     writer = csv.writer(buf)
     writer.writerow([
         "session_id", "workshop_id", "workshop_name", "community_context",
-        "prompt", "image_index", "model_rank", "user_rank",
+        "prompt", "selection_time_seconds", "image_index", "model_rank", "user_rank",
     ])
     for row in rows:
         writer.writerow(list(row))
@@ -261,7 +338,7 @@ def parse_args():
     p.add_argument("--hf-config",    default=None)
     p.add_argument("--image-column", default="image")
     p.add_argument("--max-images",   type=int, default=2000)
-    p.add_argument("--model",        default="ViT-B-32")
+    p.add_argument("--model",        default="ViT-B-16")
     p.add_argument("--pretrained",   default="openai")
     p.add_argument("--device",       default="auto")
     p.add_argument("--port",         type=int, default=8080)
@@ -270,13 +347,25 @@ def parse_args():
 
 
 def main():
-    global ENGINE
+    global ENGINE, QUERY_METRICS
     args = parse_args()
 
     if not args.folder and not args.hf_repo:
         raise SystemExit("Provide --folder <path> or --hf-repo <repo>")
 
     init_db()
+
+    # Load pre-calculated FAIR scores (produced by scripts/precalculate_metrics.py)
+    metrics_path = DATA_DIR / "metrics" / "query_metrics.json"
+    if metrics_path.exists():
+        with open(metrics_path, encoding="utf-8") as f:
+            QUERY_METRICS = json.load(f)
+        log.info("Loaded pre-calculated FAIR for %d queries from %s", len(QUERY_METRICS), metrics_path)
+    else:
+        log.info(
+            "No pre-calculated metrics at %s — run scripts/precalculate_metrics.py before the workshop",
+            metrics_path,
+        )
 
     ENGINE = RetrievalEngine(device=args.device)
     ENGINE.load_model(model_name=args.model, pretrained=args.pretrained)

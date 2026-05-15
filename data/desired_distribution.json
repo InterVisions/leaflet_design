@@ -1,0 +1,21 @@
+{
+  "_note": "Fill in the desired (target) demographic distribution before running metrics. Values for each axis must sum to 1.0. Set to null to use uniform distribution (1/N per category) as a fallback — replace with actual values once annotation is complete.",
+
+  "gender": {
+    "M.Male":   null,
+    "NB":       null,
+    "M.Female": null
+  },
+
+  "age": {
+    "young":  null,
+    "middle": null,
+    "older":  null
+  },
+
+  "skin_tone": {
+    "light":  null,
+    "medium": null,
+    "dark":   null
+  }
+}
