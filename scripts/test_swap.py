@@ -27,7 +27,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 log = logging.getLogger("test_swap")
 
 CURATED_FOLDER    = Path("data/situated-usecase-image-pool-v01/images_v01")
-DISTRACTOR_FOLDER = Path("data/fhibe")
+DISTRACTOR_FOLDER = Path("data/fhibe_sample/images")
 ANNOTATIONS_PATH  = Path("data/annotations.json")
 DIST_PATH         = Path("data/desired_distribution.json")
 TEST_QUERY        = "A person pushing a person in a wheelchair"

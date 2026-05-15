@@ -31,7 +31,7 @@
     "FAIR_age": 0.667865,
     "valid_annotations_skin_tone": 20,
     "FAIR_skin_tone": 0.780485,
-    "calculated_at": "2026-05-15T12:37:14+00:00"
+    "calculated_at": "2026-05-15T17:23:40+00:00"
   },
   "A person taking care of a child in a park": {
     "query": "A person taking care of a child in a park",
@@ -65,7 +65,7 @@
     "FAIR_age": 0.666411,
     "valid_annotations_skin_tone": 20,
     "FAIR_skin_tone": 0.730094,
-    "calculated_at": "2026-05-15T12:37:14+00:00"
+    "calculated_at": "2026-05-15T17:23:40+00:00"
   },
   "A person taking care of someone else": {
     "query": "A person taking care of someone else",
@@ -99,6 +99,6 @@
     "FAIR_age": 0.689302,
     "valid_annotations_skin_tone": 20,
     "FAIR_skin_tone": 0.804482,
-    "calculated_at": "2026-05-15T12:37:14+00:00"
+    "calculated_at": "2026-05-15T17:23:40+00:00"
   }
 }

@@ -364,7 +364,7 @@ def parse_args():
     p.add_argument("--curated-folder",    default=None, help="Curated image folder (is_curated=1)")
     p.add_argument("--distractor-folder", default=None, help="FHIBE distractor folder (is_curated=0)")
     p.add_argument("--max-curated",       type=int, default=2000)
-    p.add_argument("--max-distractors",   type=int, default=40)
+    p.add_argument("--max-distractors",   type=int, default=120)
     # Legacy single-folder / HuggingFace modes
     p.add_argument("--folder",       default=None)
     p.add_argument("--hf-repo",      default=None)
