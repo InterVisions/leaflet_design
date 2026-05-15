@@ -47,18 +47,7 @@ pip install -r requirements.txt
 python scripts/prepare_annotations.py
 
 # Step 2 — pre-calculate FAIR metrics for all queries
-python scripts/precalculate_metrics.py \
-    --curated-folder  data/situated-usecase-image-pool-v01/images_v01 \
-    --distractor-folder data/fhibe \
-    --queries     data/queries.json \
-    --annotations data/annotations.json \
-    --output      data/metrics/query_metrics.json
 
-# Step 3 — start the server
-python server.py \
-    --curated-folder  data/situated-usecase-image-pool-v01/images_v01 \
-    --distractor-folder data/fhibe
-```
 
 Then open http://127.0.0.1:8080
 

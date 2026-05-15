@@ -77,7 +77,7 @@ def parse_args() -> argparse.Namespace:
     # Combined-pool options (used with --curated-folder)
     p.add_argument("--distractor-folder", default=None,  help="FHIBE distractor folder (is_curated=0)")
     p.add_argument("--max-curated",       type=int, default=2000)
-    p.add_argument("--max-distractors",   type=int, default=2000)
+    p.add_argument("--max-distractors",   type=int, default=40)
 
     # HuggingFace options
     p.add_argument("--hf-split",     default="train",  help="Dataset split")

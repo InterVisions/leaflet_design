@@ -31,7 +31,7 @@
     "FAIR_age": 0.667865,
     "valid_annotations_skin_tone": 20,
     "FAIR_skin_tone": 0.780485,
-    "calculated_at": "2026-05-15T11:16:22+00:00"
+    "calculated_at": "2026-05-15T12:37:14+00:00"
   },
   "A person taking care of a child in a park": {
     "query": "A person taking care of a child in a park",
@@ -65,6 +65,40 @@
     "FAIR_age": 0.666411,
     "valid_annotations_skin_tone": 20,
     "FAIR_skin_tone": 0.730094,
-    "calculated_at": "2026-05-15T11:16:22+00:00"
+    "calculated_at": "2026-05-15T12:37:14+00:00"
+  },
+  "A person taking care of someone else": {
+    "query": "A person taking care of someone else",
+    "model_ranking": [
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659964_10680130.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778590878_546f0c95.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659542_c5f3d12a.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778660017_9e0811dc.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659935_1f9f047f.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659952_ee67eb20.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778670989_a996ad53.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778495433_cebb3c17.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778773522_196dbf2c.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778591243_ae2f4fce.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661253_c06282d3.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661240_bea5522c.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659901_8802dcfe.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\ann67_1778793408_52e65e2e.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task13_1778661086_c23f053e.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659695_d9efe436.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778660161_eeaf8f66.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778660173_3bf7590b.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task9_1778659595_c0b73ff3.jpg",
+      "data\\situated-usecase-image-pool-v01\\images_v01\\task6_1778773493_f1941d79.jpg"
+    ],
+    "n_curated": 20,
+    "n_total": 20,
+    "valid_annotations_gender": 20,
+    "FAIR_gender": 0.647976,
+    "valid_annotations_age": 19,
+    "FAIR_age": 0.689302,
+    "valid_annotations_skin_tone": 20,
+    "FAIR_skin_tone": 0.804482,
+    "calculated_at": "2026-05-15T12:37:14+00:00"
   }
 }

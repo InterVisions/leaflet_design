@@ -344,6 +344,70 @@
       text-align: center;
     }
 
+    /* ── Nickname gate ── */
+    #nickname-gate {
+      position: fixed;
+      inset: 0;
+      background: #f5f5f5;
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    #nickname-gate.hidden { display: none; }
+    .gate-box {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      padding: 2.5rem 2.5rem 2rem;
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .gate-box h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 0.2rem;
+    }
+    .gate-box p {
+      font-size: 0.9rem;
+      color: #666;
+      line-height: 1.5;
+    }
+    #nickname-input {
+      padding: 0.7rem 1rem;
+      font-size: 1rem;
+      border: 1.5px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      width: 100%;
+      transition: border-color .15s;
+    }
+    #nickname-input:focus { border-color: #0071e3; }
+    #nickname-submit {
+      padding: 0.7rem 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      background: #0071e3;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      transition: background .15s;
+    }
+    #nickname-submit:hover { background: #005bb5; }
+    #nickname-submit:disabled { opacity: 0.45; cursor: default; }
+    #nickname-error {
+      font-size: 0.82rem;
+      color: #c0392b;
+      min-height: 1em;
+    }
+
     /* ── Toast ── */
     #toast {
       position: fixed;
@@ -366,6 +430,18 @@
   </style>
 </head>
 <body>
+
+<!-- ── Nickname gate (shown first) ── -->
+<div id="nickname-gate">
+  <div class="gate-box">
+    <h2>Welcome</h2>
+    <p>Enter a nickname or team name before you start. This helps us tell responses apart.</p>
+    <input id="nickname-input" type="text" placeholder="e.g. Maria, Team A…"
+           maxlength="60" autocomplete="off" />
+    <div id="nickname-error"></div>
+    <button id="nickname-submit" onclick="startActivity()">Start activity →</button>
+  </div>
+</div>
 
 <!-- ── Step 1: Search & Select ── -->
 <header>
@@ -418,6 +494,22 @@
   const orderGrid    = document.getElementById('order-grid');
   const confirmBtn   = document.getElementById('confirm-btn');
   const toast        = document.getElementById('toast');
+
+  // ── Nickname gate ─────────────────────────────────────────────────────────
+  let nickname = '';
+
+  document.getElementById('nickname-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') startActivity();
+  });
+
+  function startActivity() {
+    const val = document.getElementById('nickname-input').value.trim();
+    const err = document.getElementById('nickname-error');
+    if (!val) { err.textContent = 'Please enter a nickname before starting.'; return; }
+    nickname = val;
+    document.getElementById('nickname-gate').classList.add('hidden');
+    input.focus();
+  }
 
   let toastTimer = null;
   function showToast(msg, isError = false) {
@@ -600,7 +692,7 @@
       const res = await fetch('/api/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, selections }),
+        body: JSON.stringify({ prompt, nickname, selections }),
       });
       if (!res.ok) throw new Error(await res.text());
 

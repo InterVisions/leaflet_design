@@ -65,7 +65,7 @@ class RetrievalEngine:
         curated_folder: str,
         distractor_folder: str | None = None,
         max_curated: int = 2000,
-        max_distractors: int = 2000,
+        max_distractors: int = 40,
     ):
         """Load curated images + optional FHIBE distractors into one combined pool.
 

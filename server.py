@@ -73,6 +73,7 @@ def init_db():
             "ALTER TABLE sessions ADD COLUMN workshop_id INTEGER REFERENCES workshops(id)",
             "ALTER TABLE sessions ADD COLUMN selection_time_seconds REAL",
             "ALTER TABLE sessions ADD COLUMN metrics_json TEXT",
+            "ALTER TABLE sessions ADD COLUMN nickname TEXT NOT NULL DEFAULT ''",
         ]:
             try:
                 con.execute(migration)
@@ -102,6 +103,7 @@ class RankingItem(BaseModel):
 
 class SubmitRequest(BaseModel):
     prompt:     str
+    nickname:   str = ""
     selections: List[RankingItem]
 
 
@@ -202,8 +204,8 @@ async def submit(body: SubmitRequest):
 
     with get_db() as con:
         cur = con.execute(
-            "INSERT INTO sessions (prompt, workshop_id, metrics_json) VALUES (?, ?, ?)",
-            (body.prompt.strip(), ACTIVE_WORKSHOP_ID,
+            "INSERT INTO sessions (prompt, nickname, workshop_id, metrics_json) VALUES (?, ?, ?, ?)",
+            (body.prompt.strip(), body.nickname.strip(), ACTIVE_WORKSHOP_ID,
              json.dumps(metrics) if metrics else None),
         )
         session_id = cur.lastrowid
@@ -292,39 +294,65 @@ async def list_workshops():
     return [dict(r) for r in rows]
 
 
-@app.get("/api/export_analysis")
-async def export_for_analysis():
-    with get_db() as con:
-        rows = con.execute("""
-            SELECT
-                r.session_id,
-                s.workshop_id,
-                w.name                   AS workshop_name,
-                w.community_context,
-                s.prompt,
-                s.selection_time_seconds,
-                r.image_index,
-                r.model_rank,
-                r.user_rank
-            FROM rankings r
-            JOIN sessions  s ON r.session_id  = s.id
-            LEFT JOIN workshops w ON s.workshop_id = w.id
-            ORDER BY r.session_id, r.user_rank
-        """).fetchall()
-
+def _build_csv(rows) -> str:
     buf = io.StringIO()
     writer = csv.writer(buf)
     writer.writerow([
-        "session_id", "workshop_id", "workshop_name", "community_context",
+        "session_id", "nickname", "workshop_id", "workshop_name", "community_context",
         "prompt", "selection_time_seconds", "image_index", "model_rank", "user_rank",
     ])
     for row in rows:
         writer.writerow(list(row))
+    return buf.getvalue()
 
+
+_RANKINGS_QUERY = """
+    SELECT
+        r.session_id,
+        s.nickname,
+        s.workshop_id,
+        w.name                   AS workshop_name,
+        w.community_context,
+        s.prompt,
+        s.selection_time_seconds,
+        r.image_index,
+        r.model_rank,
+        r.user_rank
+    FROM rankings r
+    JOIN sessions  s ON r.session_id  = s.id
+    LEFT JOIN workshops w ON s.workshop_id = w.id
+"""
+
+
+@app.get("/api/export_analysis")
+async def export_for_analysis():
+    with get_db() as con:
+        rows = con.execute(
+            _RANKINGS_QUERY + " ORDER BY r.session_id, r.user_rank"
+        ).fetchall()
     return Response(
-        content=buf.getvalue(),
+        content=_build_csv(rows),
         media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=rankings_export.csv"},
+        headers={"Content-Disposition": "attachment; filename=rankings_all.csv"},
+    )
+
+
+@app.get("/api/export_workshop/{workshop_id}")
+async def export_workshop(workshop_id: int):
+    with get_db() as con:
+        row = con.execute("SELECT name FROM workshops WHERE id=?", (workshop_id,)).fetchone()
+        if not row:
+            raise HTTPException(404, "workshop not found")
+        safe_name = re.sub(r"[^\w\-]+", "_", row["name"]).strip("_")[:40]
+        rows = con.execute(
+            _RANKINGS_QUERY + " WHERE s.workshop_id=? ORDER BY r.session_id, r.user_rank",
+            (workshop_id,),
+        ).fetchall()
+    filename = f"rankings_{safe_name}.csv"
+    return Response(
+        content=_build_csv(rows),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
 
 
@@ -336,7 +364,7 @@ def parse_args():
     p.add_argument("--curated-folder",    default=None, help="Curated image folder (is_curated=1)")
     p.add_argument("--distractor-folder", default=None, help="FHIBE distractor folder (is_curated=0)")
     p.add_argument("--max-curated",       type=int, default=2000)
-    p.add_argument("--max-distractors",   type=int, default=2000)
+    p.add_argument("--max-distractors",   type=int, default=40)
     # Legacy single-folder / HuggingFace modes
     p.add_argument("--folder",       default=None)
     p.add_argument("--hf-repo",      default=None)
