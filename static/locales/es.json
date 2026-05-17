@@ -1,6 +1,13 @@
 {
   "meta": {
-    "title": "Recuperación de imágenes"
+    "title": "Búsqueda de imágenes"
+  },
+  "nickname": {
+    "heading": "Bienvenidos",
+    "body": "Introduce un apodo o nombre de equipo antes de empezar. Esto nos ayuda a distinguir las respuestas.",
+    "placeholder": "p.ej. María, Equipo A…",
+    "submitBtn": "Empezar →",
+    "error": "Por favor, introduce un apodo antes de empezar."
   },
   "search": {
     "selectPrompt": "— Selecciona una búsqueda —",

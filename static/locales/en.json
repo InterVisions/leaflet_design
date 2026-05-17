@@ -2,6 +2,13 @@
   "meta": {
     "title": "Image Retrieval"
   },
+  "nickname": {
+    "heading": "Welcome",
+    "body": "Enter a nickname or team name before you start. This helps us tell responses apart.",
+    "placeholder": "e.g. Maria, Team A…",
+    "submitBtn": "Start activity →",
+    "error": "Please enter a nickname before starting."
+  },
   "search": {
     "selectPrompt": "— Select a query —",
     "button": "Search",

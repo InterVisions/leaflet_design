@@ -436,12 +436,12 @@
 <!-- ── Nickname gate (shown first) ── -->
 <div id="nickname-gate">
   <div class="gate-box">
-    <h2>Welcome</h2>
-    <p>Enter a nickname or team name before you start. This helps us tell responses apart.</p>
-    <input id="nickname-input" type="text" placeholder="e.g. Maria, Team A…"
-           maxlength="60" autocomplete="off" />
+    <h2 data-i18n="nickname.heading">Welcome</h2>
+    <p data-i18n="nickname.body">Enter a nickname or team name before you start. This helps us tell responses apart.</p>
+    <input id="nickname-input" type="text" data-i18n-placeholder="nickname.placeholder"
+           placeholder="e.g. Maria, Team A…" maxlength="60" autocomplete="off" />
     <div id="nickname-error"></div>
-    <button id="nickname-submit" onclick="startActivity()">Start activity →</button>
+    <button id="nickname-submit" onclick="startActivity()" data-i18n="nickname.submitBtn">Start activity →</button>
   </div>
 </div>
 
@@ -508,7 +508,7 @@
   function startActivity() {
     const val = document.getElementById('nickname-input').value.trim();
     const err = document.getElementById('nickname-error');
-    if (!val) { err.textContent = 'Please enter a nickname before starting.'; return; }
+    if (!val) { err.textContent = t('nickname.error'); return; }
     nickname = val;
     document.getElementById('nickname-gate').classList.add('hidden');
     input.focus();
