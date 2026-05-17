@@ -185,6 +185,28 @@ async def admin():
     return FileResponse(str(STATIC_DIR / "admin.html"))
 
 
+@app.get("/api/sessions")
+async def list_sessions(workshop_id: int | None = None):
+    with get_db() as con:
+        where  = "WHERE s.workshop_id = ?" if workshop_id is not None else ""
+        params = [workshop_id] if workshop_id is not None else []
+        sessions = con.execute(f"""
+            SELECT s.id, s.nickname, s.prompt, s.created_at, s.workshop_id
+            FROM sessions s {where}
+            ORDER BY s.id DESC
+        """, params).fetchall()
+        result = []
+        for s in sessions:
+            images = [
+                r["image_index"] for r in con.execute(
+                    "SELECT image_index FROM rankings WHERE session_id = ? ORDER BY user_rank",
+                    (s["id"],),
+                ).fetchall()
+            ]
+            result.append({**dict(s), "images": images})
+    return result
+
+
 @app.get("/api/queries")
 async def get_queries():
     queries_path = DATA_DIR / "active_queries.json"

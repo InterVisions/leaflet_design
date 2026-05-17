@@ -146,6 +146,21 @@
 
   .empty { color: #475569; font-size: 13px; text-align: center; padding: 24px 0; }
 
+  /* ── Session previews ── */
+  .preview-link {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+    background: none;
+    border: 1px solid #2d3448;
+    color: #64748b;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .preview-link:hover { background: #1e293b; color: #93c5fd; border-color: #2563eb; }
+
   /* ── Toast ── */
   #toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
@@ -236,6 +251,14 @@
     </a>
   </div>
 
+  <!-- Session previews -->
+  <div class="card">
+    <h2>Session previews</h2>
+    <div id="sessions-wrap">
+      <div class="empty">Loading…</div>
+    </div>
+  </div>
+
 </div>
 <div id="toast"></div>
 
@@ -322,15 +345,46 @@
       </table>`;
   }
 
+  // ── Render session previews ────────────────────────────────────────────────
+  function renderSessions(sessions) {
+    const wrap = document.getElementById('sessions-wrap');
+    if (!sessions.length) {
+      wrap.innerHTML = '<div class="empty">No sessions yet.</div>';
+      return;
+    }
+    const rows = sessions.map(s => {
+      const images = s.images.join(',');
+      const url    = `/flipbook?images=${images}&prompt=${encodeURIComponent(s.prompt)}&lang=en&session_id=${s.id}`;
+      const time   = (s.created_at || '').slice(0, 16).replace('T', ' ');
+      const prompt = s.prompt.length > 45 ? s.prompt.slice(0, 45) + '…' : s.prompt;
+      return `<tr>
+        <td>${s.nickname || '—'}</td>
+        <td title="${s.prompt}" style="color:#94a3b8">${prompt}</td>
+        <td style="color:#64748b;font-size:12px;white-space:nowrap">${time}</td>
+        <td class="n-sessions">${s.images.length}</td>
+        <td><a class="preview-link" href="${url}" target="_blank">Preview ↗</a></td>
+      </tr>`;
+    }).join('');
+    wrap.innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Nickname</th><th>Prompt</th><th>Time</th><th>Photos</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
   // ── Refresh everything ─────────────────────────────────────────────────────
   async function refresh() {
     try {
-      const [status, workshops] = await Promise.all([
+      const [status, workshops, sessions] = await Promise.all([
         api('GET', '/api/workshop/active'),
         api('GET', '/api/workshops'),
+        api('GET', '/api/sessions'),
       ]);
       renderStatus(status);
       renderHistory(workshops);
+      renderSessions(sessions);
     } catch (e) {
       console.error('refresh failed:', e);
     }
