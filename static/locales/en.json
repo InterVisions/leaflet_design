@@ -3,7 +3,7 @@
     "title": "Image Retrieval"
   },
   "search": {
-    "placeholder": "e.g. a person running on the beach",
+    "selectPrompt": "— Select a query —",
     "button": "Search",
     "searching": "Searching…",
     "results": "{n} results for “{query}”",

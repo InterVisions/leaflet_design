@@ -185,6 +185,15 @@ async def admin():
     return FileResponse(str(STATIC_DIR / "admin.html"))
 
 
+@app.get("/api/queries")
+async def get_queries():
+    queries_path = DATA_DIR / "active_queries.json"
+    if not queries_path.exists():
+        return []
+    with open(queries_path, encoding="utf-8") as f:
+        return json.load(f)
+
+
 @app.get("/api/search")
 async def search(query: str, top_k: int | None = None):
     if not query.strip():

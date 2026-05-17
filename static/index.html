@@ -29,16 +29,18 @@
       gap: 0.5rem;
     }
 
-    input[type="text"] {
+    select#query {
       flex: 1;
       padding: 0.65rem 1rem;
       font-size: 1rem;
       border: 1px solid #ccc;
       border-radius: 8px;
       outline: none;
+      background: #fff;
+      cursor: pointer;
     }
 
-    input[type="text"]:focus { border-color: #555; }
+    select#query:focus { border-color: #555; }
 
     button {
       padding: 0.65rem 1.4rem;
@@ -447,8 +449,9 @@
 <header>
   <h1 data-i18n="meta.title">Image Retrieval</h1>
   <div class="search-bar">
-    <input id="query" type="text" data-i18n-placeholder="search.placeholder"
-           placeholder="e.g. a person running on the beach" />
+    <select id="query">
+      <option value="" disabled selected data-i18n="search.selectPrompt">— Select a query —</option>
+    </select>
     <button id="btn" onclick="search()" data-i18n="search.button">Search</button>
   </div>
 </header>
@@ -520,7 +523,7 @@
     toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
   }
 
-  input.addEventListener('keydown', e => { if (e.key === 'Enter') search(); });
+  input.addEventListener('change', () => search());
 
   // ── Step 1 state ──────────────────────────────────────────────────────────
   // selection: unordered set of {imageIndex, modelRank, cardEl}
@@ -706,6 +709,25 @@
       confirmBtn.disabled = false;
     }
   }
+
+  // ── Load fixed query list ─────────────────────────────────────────────────
+  async function loadQueries() {
+    try {
+      const res = await fetch('/api/queries');
+      if (!res.ok) return;
+      const queries = await res.json();
+      const locale = i18n.getCurrentLocale();
+      queries.forEach(q => {
+        const opt = document.createElement('option');
+        opt.value = q.en;                    // English sent to backend / stored in DB
+        opt.textContent = q[locale] || q.en; // displayed in current locale
+        input.appendChild(opt);
+      });
+    } catch (e) {
+      console.warn('Failed to load queries:', e);
+    }
+  }
+  loadQueries();
 
   // ── Search ────────────────────────────────────────────────────────────────
   async function search() {

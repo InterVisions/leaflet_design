@@ -3,7 +3,7 @@
     "title": "Recuperación de imágenes"
   },
   "search": {
-    "placeholder": "p. ej. una persona corriendo en la playa",
+    "selectPrompt": "— Selecciona una búsqueda —",
     "button": "Buscar",
     "searching": "Buscando…",
     "results": "{n} resultados para «{query}»",
