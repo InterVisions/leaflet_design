@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "title": "Cerca d'imatges"
+  },
+  "nickname": {
+    "heading": "Benvinguts",
+    "body": "Introdueix un sobrenom o nom d'equip abans de començar. Això ens ajuda a distingir les respostes.",
+    "placeholder": "p.ex. Maria, Equip A…",
+    "submitBtn": "Comença →",
+    "error": "Si us plau, introdueix un sobrenom abans de començar."
+  },
+  "search": {
+    "selectPrompt": "— Selecciona una cerca —",
+    "button": "Cerca",
+    "searching": "Cercant…",
+    "results": "{n} resultats per a \"{query}\"",
+    "error": "Error: {msg}"
+  },
+  "select": {
+    "count": "Seleccionades: {n} / 9",
+    "maxReached": "Màxim 9 fotos seleccionades.",
+    "needSearch": "Primer fes una cerca.",
+    "clearBtn": "Esborra",
+    "orderBtn": "Ordena les fotos →"
+  },
+  "order": {
+    "backBtn": "← Enrere",
+    "heading": "Arrossega per ordenar les fotos — la 1 apareix primer al fullet",
+    "hint": "Arrossega les targetes per establir l'ordre. La foto 1 apareixerà primer al fullet.",
+    "dragLabel": "arrossega per reordenar",
+    "confirmBtn": "Genera el fullet"
+  },
+  "flipbook": {
+    "title": "El teu fullet",
+    "backLink": "← Torna a la cerca",
+    "prevBtn": "← Anterior",
+    "nextBtn": "Següent →",
+    "pageOf": "Pàgina {current} de {total}",
+    "noImages": "No s'han trobat imatges.",
+    "goBack": "Torna a la cerca i selecciona imatges."
+  },
+  "leaflet": {
+    "cover": {
+      "tag": "Iniciativa comunitària",
+      "titleLine1": "El nostre",
+      "titleLine2": "Barri",
+      "sub": "Explorant: {prompt}"
+    },
+    "feature": {
+      "heading": "Visió compartida",
+      "body": "Estem construint espais que funcionen per a tothom, des de l'escolta, la inclusió i la cura col·lectiva.",
+      "badge": "Primer pla",
+      "sideHeading": "Disseny per a tothom",
+      "sideBody": "Entorns accessibles, pensats des de les necessitats del veïnat."
+    },
+    "story": {
+      "photoLabel": "La nostra comunitat",
+      "heading": "Convivència",
+      "col1": "Els nostres espais comuns reflecteixen el que valorem: inclusió, sostenibilitat i compromís amb el benestar de qui vivim aquí.",
+      "col2": "Quan s'escolta tothom, els espais que compartim es converteixen veritablement en nostres."
+    },
+    "gallery": {
+      "heading": "Perspectives del veïnat",
+      "sub": "Mirades diverses, una visió compartida.",
+      "primaryLabel": "Imatge destacada"
+    },
+    "closing": {
+      "stat1n": "100%",
+      "stat1l": "Liderada per la comunitat",
+      "stat2n": "Gratuït",
+      "stat2l": "Obert a tothom",
+      "ctaHeading": "Participa",
+      "ctaBody": "La teva veu dona forma al nostre futur comú. Uneix-te a la conversa."
+    }
+  }
+}

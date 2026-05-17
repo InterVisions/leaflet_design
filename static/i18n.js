@@ -4,7 +4,7 @@
  * before any other script runs. Locale is persisted in localStorage.
  */
 (function () {
-  const SUPPORTED = ['en', 'es'];
+  const SUPPORTED = ['en', 'ca', 'es'];
   const stored    = localStorage.getItem('locale');
   const locale    = SUPPORTED.includes(stored) ? stored : 'en';
 
@@ -69,34 +69,45 @@
    * Shows the *other* locale label (clicking switches to it).
    */
   function injectSwitcher() {
-    const other = locale === 'en' ? 'es' : 'en';
-    const label = locale === 'en' ? 'ES' : 'EN';
+    const locales = [
+      { code: 'en',  label: 'EN'  },
+      { code: 'ca',  label: 'CAT' },
+      { code: 'es',  label: 'ES'  },
+    ];
 
-    const btn = document.createElement('button');
-    btn.id        = 'lang-switcher';
-    btn.textContent = label;
-    btn.title     = locale === 'en' ? 'Cambiar a español' : 'Switch to English';
-    btn.onclick   = () => setLocale(other);
-
-    Object.assign(btn.style, {
-      position:     'fixed',
-      top:          '1rem',
-      right:        '1rem',
-      zIndex:       '500',
-      padding:      '0.3rem 0.75rem',
-      fontSize:     '0.78rem',
-      fontWeight:   '700',
-      background:   '#fff',
-      color:        '#333',
-      border:       '1.5px solid #ccc',
-      borderRadius: '6px',
-      cursor:       'pointer',
-      letterSpacing:'0.06em',
-      boxShadow:    '0 1px 4px rgba(0,0,0,0.12)',
-      fontFamily:   'inherit',
+    const wrapper = document.createElement('div');
+    wrapper.id = 'lang-switcher';
+    Object.assign(wrapper.style, {
+      position:  'fixed',
+      top:       '1rem',
+      right:     '1rem',
+      zIndex:    '500',
+      display:   'flex',
+      gap:       '0.3rem',
     });
 
-    document.body.appendChild(btn);
+    locales.forEach(({ code, label }) => {
+      const btn = document.createElement('button');
+      btn.textContent = label;
+      const active = code === locale;
+      Object.assign(btn.style, {
+        padding:       '0.3rem 0.6rem',
+        fontSize:      '0.78rem',
+        fontWeight:    active ? '700' : '400',
+        background:    active ? '#222' : '#fff',
+        color:         active ? '#fff' : '#333',
+        border:        '1.5px solid #ccc',
+        borderRadius:  '6px',
+        cursor:        active ? 'default' : 'pointer',
+        letterSpacing: '0.06em',
+        boxShadow:     '0 1px 4px rgba(0,0,0,0.12)',
+        fontFamily:    'inherit',
+      });
+      if (!active) btn.onclick = () => setLocale(code);
+      wrapper.appendChild(btn);
+    });
+
+    document.body.appendChild(wrapper);
   }
 
   /* ── Auto-apply on DOMContentLoaded ────────────────────────────────────── */
