@@ -15,6 +15,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from retrieval import RetrievalEngine
@@ -27,6 +28,13 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 log = logging.getLogger("server")
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://representacion.intervisions.eu"],  # or ["*"] for testing
+    allow_credentials=True,
+    allow_methods=["*"],   # this is what fixes the OPTIONS 405
+    allow_headers=["*"],
+)
 ENGINE:             RetrievalEngine | None = None
 ACTIVE_WORKSHOP_ID: int | None = None
 QUERY_METRICS:      dict = {}   # loaded from data/metrics/query_metrics.json (pre-calculated FAIR)
@@ -364,7 +372,7 @@ def parse_args():
     p.add_argument("--curated-folder",    default=None, help="Curated image folder (is_curated=1)")
     p.add_argument("--distractor-folder", default=None, help="FHIBE distractor folder (is_curated=0)")
     p.add_argument("--max-curated",       type=int, default=2000)
-    p.add_argument("--max-distractors",   type=int, default=120)
+    p.add_argument("--max-distractors",   type=int, default=20000)
     # Legacy single-folder / HuggingFace modes
     p.add_argument("--folder",       default=None)
     p.add_argument("--hf-repo",      default=None)
