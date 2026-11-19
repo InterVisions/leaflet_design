@@ -1,0 +1,58 @@
+[Unit]
+Description=Las Agencias — semantic image retrieval & flipbook
+After=network.target
+
+[Service]
+# ── Who runs the service ──────────────────────────────────────────────────────
+User=ubuntu
+Group=ubuntu
+
+# ── Where the project lives ───────────────────────────────────────────────────
+# Change this to the absolute path where you cloned/copied the project.
+WorkingDirectory=/opt/leaflet_design
+
+# ── Python environment ────────────────────────────────────────────────────────
+# If you use a virtualenv, point ExecStart at its python binary, e.g.:
+#   /opt/leaflet_design/venv/bin/python server.py ...
+# Otherwise, use the system python3:
+ExecStart=/usr/bin/python3 server.py \
+    --hf-repo nlphuji/flickr30k \
+    --host 0.0.0.0 \
+    --port 8080
+
+# Common alternatives — uncomment and edit one block, delete the other:
+#
+# Local image folder:
+#   ExecStart=/usr/bin/python3 server.py \
+#       --folder /opt/leaflet_design/images \
+#       --host 0.0.0.0 \
+#       --port 8080
+#
+# Capped dataset with a larger model:
+#   ExecStart=/usr/bin/python3 server.py \
+#       --hf-repo nlphuji/flickr30k \
+#       --max-images 2000 \
+#       --model ViT-L-14 \
+#       --pretrained openai \
+#       --host 0.0.0.0 \
+#       --port 8080
+
+# ── Environment ───────────────────────────────────────────────────────────────
+# HuggingFace token — required only for gated datasets.
+# Generate at https://huggingface.co/settings/tokens, then set here.
+# Environment=HF_TOKEN=your_token_here
+
+# Cache directory for HuggingFace datasets and model weights.
+Environment=HF_HOME=/opt/leaflet_design/.hf_cache
+
+# ── Restart behaviour ─────────────────────────────────────────────────────────
+Restart=on-failure
+RestartSec=10
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=leaflet
+
+[Install]
+WantedBy=multi-user.target

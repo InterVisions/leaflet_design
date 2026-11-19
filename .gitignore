@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.hf_cache/
+
+# Never commit data: images, annotations, embeddings, participant DB.
+data/*
+!data/queries.json
+!data/active_queries.json
+!data/desired_distribution.json
+*.db
+*.db.*
+*.pt
+*.csv
+results/

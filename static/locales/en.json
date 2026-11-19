@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "title": "Image Retrieval"
+  },
+  "nickname": {
+    "heading": "Welcome",
+    "body": "Enter a nickname or team name before you start. This helps us tell responses apart.",
+    "placeholder": "e.g. Maria, Team A…",
+    "submitBtn": "Start activity →",
+    "error": "Please enter a nickname before starting."
+  },
+  "search": {
+    "selectPrompt": "— Select a query —",
+    "button": "Search",
+    "searching": "Searching…",
+    "results": "{n} results for “{query}”",
+    "error": "Error: {msg}"
+  },
+  "select": {
+    "count": "Selected: {n} / 9",
+    "maxReached": "Maximum 9 photos selected.",
+    "needSearch": "Search for something first.",
+    "clearBtn": "Clear",
+    "orderBtn": "Order photos →"
+  },
+  "order": {
+    "backBtn": "← Back",
+    "heading": "Drag to rank your photos — 1 appears first in the flipbook",
+    "hint": "Drag cards to set the order. Photo 1 will appear first in the flipbook.",
+    "dragLabel": "drag to reorder",
+    "confirmBtn": "Generate flipbook"
+  },
+  "flipbook": {
+    "title": "Your Flipbook",
+    "backLink": "← Back to search",
+    "prevBtn": "← Previous",
+    "nextBtn": "Next →",
+    "pageOf": "Page {current} of {total}",
+    "noImages": "No images found.",
+    "goBack": "Go back to search and select images."
+  },
+  "leaflet": {
+    "cover": {
+      "tag": "Community Initiative",
+      "titleLine1": "Our",
+      "titleLine2": "Neighbourhood",
+      "sub": "Exploring: {prompt}"
+    },
+    "feature": {
+      "heading": "Shared Vision",
+      "body": "We are shaping spaces that work for everyone — built on listening, inclusion, and collective care.",
+      "badge": "Closer Look",
+      "sideHeading": "Design for Everyone",
+      "sideBody": "Accessible environments shaped by the needs of the whole community."
+    },
+    "story": {
+      "photoLabel": "Our Community",
+      "heading": "Living Together",
+      "col1": "Our shared spaces reflect what we value: inclusion, sustainability, and a commitment to the wellbeing of all who live here.",
+      "col2": "When every voice is heard, the spaces we share become truly ours."
+    },
+    "gallery": {
+      "heading": "Community Perspectives",
+      "sub": "Different views, one shared vision.",
+      "primaryLabel": "Featured Image"
+    },
+    "closing": {
+      "stat1n": "100%",
+      "stat1l": "Community-led",
+      "stat2n": "Free",
+      "stat2l": "Open to all",
+      "ctaHeading": "Get Involved",
+      "ctaBody": "Your voice shapes our shared future. Join the conversation."
+    }
+  }
+}

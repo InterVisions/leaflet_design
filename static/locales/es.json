@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "title": "Búsqueda de imágenes"
+  },
+  "nickname": {
+    "heading": "Bienvenidas",
+    "body": "Introduce un apodo o nombre de equipo antes de empezar. Esto nos ayuda a distinguir las respuestas.",
+    "placeholder": "p.ej. María, Equipo A…",
+    "submitBtn": "Empezar →",
+    "error": "Por favor, introduce un apodo antes de empezar."
+  },
+  "search": {
+    "selectPrompt": "— Selecciona una búsqueda —",
+    "button": "Buscar",
+    "searching": "Buscando…",
+    "results": "{n} resultados para «{query}»",
+    "error": "Error: {msg}"
+  },
+  "select": {
+    "count": "Seleccionadas: {n} / 9",
+    "maxReached": "Máximo 9 fotos seleccionadas.",
+    "needSearch": "Primero realiza una búsqueda.",
+    "clearBtn": "Borrar",
+    "orderBtn": "Ordenar fotos →"
+  },
+  "order": {
+    "backBtn": "← Volver",
+    "heading": "Arrastra para ordenar las fotos — la 1 aparece primero en el folleto",
+    "hint": "Arrastra las tarjetas para establecer el orden. La foto 1 aparecerá primero en el folleto.",
+    "dragLabel": "arrastra para reordenar",
+    "confirmBtn": "Generar folleto"
+  },
+  "flipbook": {
+    "title": "Tu folleto",
+    "backLink": "← Volver a la búsqueda",
+    "prevBtn": "← Anterior",
+    "nextBtn": "Siguiente →",
+    "pageOf": "Página {current} de {total}",
+    "noImages": "No se han encontrado imágenes.",
+    "goBack": "Vuelve a la búsqueda y selecciona imágenes."
+  },
+  "leaflet": {
+    "cover": {
+      "tag": "Iniciativa comunitaria",
+      "titleLine1": "Nuestro",
+      "titleLine2": "Vecindario",
+      "sub": "Explorando: {prompt}"
+    },
+    "feature": {
+      "heading": "Visión compartida",
+      "body": "Estamos construyendo espacios que funcionan para toda la ciudadanía, desde la escucha, la inclusión y el cuidado colectivo.",
+      "badge": "Vista de detalle",
+      "sideHeading": "Diseño para todas las personas",
+      "sideBody": "Entornos accesibles, pensados desde las necesidades del vecindario."
+    },
+    "story": {
+      "photoLabel": "Nuestra comunidad",
+      "heading": "Convivencia",
+      "col1": "Nuestros espacios comunes reflejan lo que valoramos: inclusión, sostenibilidad y compromiso con el bienestar de quienes vivimos aquí.",
+      "col2": "Cuando se escucha a todas las personas, los espacios que compartimos se convierten verdaderamente en nuestros."
+    },
+    "gallery": {
+      "heading": "Perspectivas del vecindario",
+      "sub": "Distintas miradas, una visión compartida.",
+      "primaryLabel": "Imagen destacada"
+    },
+    "closing": {
+      "stat1n": "100%",
+      "stat1l": "Gratuito",
+      "stat2n": "80%",
+      "stat2l": "Aumento en zonas verdes",
+      "ctaHeading": "Participa",
+      "ctaBody": "Tu voz da forma a nuestro futuro común. Únete a la conversación."
+    }
+  }
+}
